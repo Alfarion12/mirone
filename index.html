@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#fdfbf8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Мирон — короткая практика с ИИ после трудного разговора.">
+  <title>Мирон. Услышать себя</title>
+  <style>
+    :root {
+      color-scheme: light;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      --paper: #fdfbf8;
+      --white: #fffefa;
+      --ink: #302521;
+      --muted: #67564e;
+      --line: #eaddd4;
+      --peach: #f8e9df;
+      --cream: #f7f1e8;
+      --accent: #91442f;
+      --accent-dark: #743320;
+      --serif: Georgia, "Times New Roman", serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink); font: 16px/1.55 system-ui, sans-serif; overflow-wrap: anywhere; }
+    button, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .shell { width: calc(100% - 64px); max-width: 1060px; margin-inline: auto; }
+    .top { display: flex; align-items: center; justify-content: space-between; height: 80px; border-bottom: 1px solid var(--line); }
+    .brand { display: inline-flex; align-items: center; gap: 10px; }
+    .brand-portrait { position: relative; display: block; flex: none; width: 36px; height: 36px; }
+    .brand-portrait img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .brand-portrait::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 7px; height: 7px; background: #419451; border: 2px solid var(--paper); border-radius: 50%; }
+    .brand strong { font: 600 26px/1 Candara, system-ui, sans-serif; letter-spacing: -.035em; }
+    .header-menu { position: relative; z-index: 3; }
+    .header-menu summary { list-style: none; cursor: pointer; }
+    .header-menu summary::-webkit-details-marker { display: none; }
+    .header-menu summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .menu-toggle { display: grid; place-content: center; gap: 4px; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+    .menu-toggle span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--ink); }
+    .header-menu[open] .menu-toggle { background: var(--cream); }
+    .menu-panel { position: absolute; top: calc(100% + 8px); right: 0; width: min(260px, calc(100vw - 32px)); padding: 5px 12px; background: var(--white); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 28px #34221814; }
+    .menu-panel details + details { border-top: 1px solid var(--line); }
+    .menu-panel summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; font-size: 15px; font-weight: 600; }
+    .menu-panel summary::after { content: ""; width: 6px; height: 6px; margin-right: 3px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(45deg); }
+    .menu-panel details[open] > summary::after { transform: rotate(225deg); }
+    .menu-panel .contact-link { color: var(--accent-dark); text-decoration: underline; text-underline-offset: 3px; }
+    .menu-panel p { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    main.shell { padding-bottom: 24px; }
+    .screen { min-width: 0; }
+    #home { max-width: 600px; margin-inline: auto; }
+    .hero { padding: 60px 0 24px; }
+    .kicker { color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 18px; }
+    h1 { font: 500 clamp(43px, 5.2vw, 76px)/.99 var(--serif); letter-spacing: -.053em; margin: 0; }
+    .hero h1 span { display: block; font-size: .70em; line-height: 1.1; margin-top: 9px; color: var(--accent); letter-spacing: -.038em; }
+    .hero .kicker, .hero-copy > p:not(.kicker) { font-family: "Segoe UI", system-ui, sans-serif; }
+    .hero .kicker { margin-bottom: 22px; }
+    .hero-copy > p:not(.kicker) { max-width: 460px; color: var(--muted); font-size: 17px; margin: 28px 0 30px; }
+    .primary, .secondary { display: inline-flex; justify-content: center; align-items: center; gap: 12px; min-height: 52px; max-width: 100%; padding: 0 20px; border-radius: 12px; font-weight: 650; text-align: center; transition: background .15s ease; }
+    .primary { border: 1px solid var(--accent); background: var(--accent); color: #fffefa; }
+    .primary:hover { background: var(--accent-dark); }
+    .secondary { border: 1px solid #d9b9aa; background: transparent; color: var(--accent-dark); }
+    .secondary:hover { background: var(--peach); }
+    .hero .primary { min-width: 218px; }
+    .arrow { font-size: 20px; line-height: 1; font-weight: 400; }
+    .timing { display: block; margin-top: 10px; color: var(--muted); font-size: 13px; }
+    .quiet-note { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 12px; background: var(--cream); color: var(--muted); width: fit-content; max-width: 100%; font-size: 14px; }
+    .quiet-note svg { flex: none; color: var(--accent); }
+    .focused { width: min(100%, 640px); margin: 0 auto; padding-top: 38px; }
+    .phase { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .phase > div:first-child { min-width: 0; }
+    .phase h1 { font-size: 39px; line-height: 1.08; }
+    .phase .kicker { margin-bottom: 7px; }
+    .dialogue { border: 1px solid var(--line); background: var(--white); border-radius: 20px; padding: 24px; }
+    .user-voice { margin: 0 0 20px auto; max-width: 92%; width: fit-content; padding: 10px 14px; background: var(--cream); color: var(--muted); border-radius: 13px 13px 3px 13px; font-size: 14px; }
+    .speaker { display: flex; align-items: center; gap: 8px; color: var(--accent-dark); font-weight: 650; font-size: 13px; }
+    .speaker-avatar { flex: none; width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+    [data-avatar="mono"] .speaker-avatar { filter: grayscale(1); }
+    [data-avatar="beige"] .speaker-avatar { filter: grayscale(1) sepia(.67) saturate(.55); }
+    .response { margin: 12px 0 0; font-size: 16px; line-height: 1.6; }
+    .response p { margin: 0 0 12px; }
+    .response p:last-child { margin-bottom: 0; }
+    .response blockquote { font: italic 19px/1.55 var(--serif); margin: 13px 0; padding: 12px 15px; border-left: 2px solid #c78d78; background: var(--peach); border-radius: 0 8px 8px 0; }
+    .composer { margin-top: 15px; }
+    .composer form { display: flex; align-items: end; gap: 8px; }
+    .composer textarea { display: block; flex: 1; min-width: 0; resize: vertical; min-height: 48px; padding: 10px 13px; border: 1px solid #d4c4b9; border-radius: 11px; background: var(--white); color: var(--ink); }
+    .composer textarea::placeholder { color: var(--muted); }
+    .send { min-height: 48px; border: 1px solid var(--accent); padding: 0 15px; background: var(--accent); border-radius: 11px; color: var(--white); font-weight: 650; }
+    .sample { border: 0; margin-top: 5px; min-height: 38px; background: transparent; color: var(--accent-dark); text-decoration: underline; text-underline-offset: 3px; padding: 4px 1px; font-size: 13px; }
+    .ending { padding-top: 42px; }
+    .ending h1 { font-size: clamp(39px, 5vw, 58px); line-height: 1.05; }
+    .ending .kicker { margin-bottom: 12px; }
+    .ending-text { font-size: 17px; color: var(--muted); margin: 16px 0 21px; max-width: 520px; }
+    .step-card { background: var(--peach); border-radius: 15px; padding: 15px 18px; margin-bottom: 18px; }
+    .step-card strong { display: block; color: var(--accent-dark); font-size: 13px; }
+    .step-card p { margin: 4px 0 0; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    @media (max-width: 640px) {
+      .menu-panel { width: calc(min(100vw, var(--mobile-width, 375px)) - 32px); max-height: calc(100dvh - 90px); overflow-y: auto; }
+      body { max-width: var(--mobile-width, 375px); }
+      .shell { width: calc(100% - 32px); }
+      .top { height: 61px; }
+      .brand-portrait { width: 34px; height: 34px; }
+      .brand strong { font-size: 24px; }
+      .hero .kicker { margin-bottom: 13px; }
+      h1 { font-size: clamp(38px, 11.6vw, 60px); }
+      .hero h1 span { max-width: 350px; font-size: .72em; margin-top: 6px; }
+      .hero-copy > p:not(.kicker) { margin: 16px 0 18px; font-size: 15px; }
+      .hero .primary { width: 100%; min-width: 0; }
+      .timing { margin-top: 7px; text-align: center; font-size: 12px; }
+      .quiet-note { width: 100%; padding: 11px 12px; font-size: 13px; gap: 9px; }
+      .focused { padding-top: 23px; }
+      .phase { margin-bottom: 13px; }
+      .phase h1 { font-size: 33px; }
+      .dialogue { padding: 16px; border-radius: 15px; }
+      .user-voice { margin-bottom: 15px; font-size: 13px; }
+      .response { font-size: 15px; }
+      .response blockquote { font-size: 18px; }
+      .ending { padding-top: 28px; }
+      .ending h1 { font-size: 39px; }
+      .ending-text { font-size: 15px; margin: 13px 0 16px; }
+      .step-card { padding: 12px 14px; margin-bottom: 14px; }
+    }
+    .response, .user-voice, .ending-text { overflow-wrap: anywhere; }
+    .composer { scroll-margin-block: 12px; }
+    .composer textarea { font-size: 16px; }
+    .answer-status { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+    .answer-status[data-error="true"] { color: var(--accent-dark); }
+    .send:disabled { opacity: .7; cursor: wait; }
+    @media (max-width: 640px) {
+      .top { height: 57px; }
+      .brand strong { font-size: 29px; }
+      .hero { padding: 30px 0 20px; padding-top: clamp(26px, 5svh, 46px); }
+      .hero h1 { font-size: clamp(37px, 11vw, 43px); }
+      .hero-copy > p:not(.kicker) { margin: 21px 0 27px; font-size: 16px; }
+      .composer { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    }
+    @media (max-width: 640px) and (max-height: 600px) {
+      .hero .kicker { margin-bottom: 11px; }
+      .hero-copy > p:not(.kicker) { margin-top: 18px; margin-bottom: 23px; }
+    }
+    @media (max-width: 340px) {
+      .composer form { flex-wrap: wrap; }
+      .composer textarea { flex-basis: 100%; }
+      .composer .send { margin-left: auto; max-width: 100%; }
+    }
+    .composer textarea, .outcome textarea { min-width: 0; }
+    .outcome textarea { display: block; width: 100%; min-height: 44px; padding: 9px 13px; border: 1px solid #d4c4b9; border-radius: 11px; background: var(--white); color: var(--ink); font: inherit; }
+    .response blockquote { white-space: pre-wrap; }
+    .outcome h2 { margin: 0 0 7px; color: var(--accent-dark); font-size: 18px; line-height: 1.25; }
+    #outcome-title { margin-top: 10px; }
+    #outcome-thought { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+    #outcome-thought.expanded { display: block; }
+    .outcome-summary .sample { display: block; min-height: 32px; margin: 0; font-size: 13px; }
+    .outcome .outcome-note { color: var(--accent-dark); font-size: 13px; line-height: 1.35; margin: 8px 0 0; }
+    .outcome .secondary { position: relative; width: 100%; margin-top: 9px; padding-inline: 38px; }
+    .copy-check { position: absolute; inset-inline-end: 14px; top: 50%; transform: translateY(-50%); color: #287648; font-size: 20px; }
+    .final-share { display: grid; grid-template-columns: 19px minmax(0, 1fr) 19px; gap: 8px; width: 100%; text-align: center; }
+    @media (hover: hover) {
+      #copy-outcome:hover { background: #f0dcd1; border-color: var(--accent); }
+      .final-share .sample:hover { color: var(--accent); text-decoration-thickness: 2px; }
+    }
+    .final-share p { margin: 0; }
+    .final-share .sample { display: block; min-height: 30px; margin: 0 auto; padding: 0; font-size: inherit; }
+    .share-options { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; }
+    .share-options a { padding-block: 8px; color: var(--accent-dark); }
+    @media (max-width: 600px) {
+      #end { padding-top: 12px; }
+      #end h1 { margin-bottom: 0; }
+      #end .ending-text { margin: 9px 0 12px; }
+      #end .outcome { margin-bottom: 9px; padding-block: 10px; }
+      .final-share .sample { font-size: 15px; }
+    }
+    .outcome #outcome-status:empty { display: none; }
+    .outcome textarea { margin-top: 8px; resize: vertical; }
+    body, .hero .kicker, .hero-copy > p:not(.kicker) { font-family: "Segoe UI", system-ui, sans-serif; }
+    [data-active-screen="chat"] main.shell { padding-bottom: 0; }
+    #chat.focused { display: flex; flex-direction: column; gap: 10px; height: calc(var(--chat-height, 100vh) - 80px); height: calc(min(var(--chat-height, 100dvh), 100dvh) - 80px); min-height: 274px; padding-block: 20px 12px; }
+    .chat-intro { flex: none; }
+    .chat-intro .kicker { margin: 0 0 6px; }
+    .chat-intro h1 { font-size: clamp(29px, 8vw, 36px); line-height: 1.08; }
+    #chat .dialogue { display: flex; flex-direction: column; gap: 12px; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 12px 10px; overscroll-behavior-y: contain; }
+    #chat .dialogue {
+      border-color: #edcda0 #d4ad83 #d4ad83 #e8c398;
+    }
+    #chat .dialogue::-webkit-scrollbar { width: 10px; }
+    #chat .dialogue::-webkit-scrollbar-track { background: transparent; margin-block: 12px; }
+    #chat .dialogue::-webkit-scrollbar-thumb { background: rgba(104, 62, 43, .28); border-radius: 999px; }
+    @supports not selector(::-webkit-scrollbar) {
+      #chat .dialogue { clip-path: inset(0 round 20px); scrollbar-color: rgba(104, 62, 43, .28) transparent; }
+    }
+    .chat-turn { display: flex; align-items: end; gap: 7px; flex: none; }
+    .chat-turn.me { justify-content: flex-end; }
+    .chat-turn .face { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; flex: none; object-fit: cover; }
+    .chat-turn.me .face { color: var(--accent-dark); font-size: 12px; font-weight: 600; }
+    .chat-turn .response { margin: 0; min-width: 0; max-width: min(84%, calc(100% - 33px)); padding: 9px 11px; border-radius: 12px 12px 12px 3px; background: var(--cream); font-size: 15px; line-height: 1.45; }
+    .chat-turn.me .response { border-radius: 12px 12px 3px 12px; white-space: pre-wrap; }
+    .chat-progress { flex: none; display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--muted); font-size: 12px; }
+    #chat .composer { flex: none; margin: 0; }
+    #chat .composer form { flex-wrap: nowrap; }
+    #chat .composer form.message-form textarea { flex: 1 1 auto; min-height: 46px; height: 46px; resize: none; }
+    #chat .send-icon { display: grid; place-items: center; flex: none; width: 46px; height: 46px; min-height: 46px; padding: 0; font-size: 21px; }
+    #chat .send-icon:disabled { font-size: 12px; }
+
+    @media (max-width: 640px) {
+      #chat.focused { height: calc(var(--chat-height, 100vh) - 57px); height: calc(min(var(--chat-height, 100dvh), 100dvh) - 57px); padding-top: 17px; }
+    }
+    .chat-title-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .progress-track { flex: none; width: clamp(42px, 14vw, 58px); height: 4px; overflow: hidden; border-radius: 4px; background: #e7dbd2; }
+    .progress-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--accent); }
+    .chat-title-row h1 { min-width: 0; white-space: nowrap; }
+    .chat-title-row .chat-progress { position: relative; flex: none; align-self: flex-end; margin-bottom: 4px; }
+    #chat .composer form.message-form { align-items: center; gap: 4px; min-height: 48px; padding: 2px; border: 1px solid #d4c4b9; border-radius: 12px; background: var(--white); }
+    #chat .composer form.message-form:focus-within { border-color: var(--accent); }
+    #chat .composer form.message-form textarea { height: 42px; min-height: 42px; max-height: 64px; padding-block: 10px; border: 0; background: transparent; outline: 0; line-height: 22px; resize: none; overflow-y: auto; scrollbar-width: none; }
+    #chat .composer .message-form .send-icon { position: relative; width: 44px; height: 42px; min-height: 42px; border: 0; background: transparent; isolation: isolate; align-self: flex-end; }
+    #chat .composer .message-form .send-icon::before { content: ""; position: absolute; z-index: -1; inset: 2px; border-radius: 9px; background: var(--accent); }
+    #chat .composer form.message-form textarea { white-space: pre-wrap; overflow-wrap: anywhere; }
+    #chat .composer form.message-form textarea::-webkit-scrollbar { display: none; }
+    @supports (field-sizing: content) {
+      #chat .composer form.message-form textarea { field-sizing: content; height: auto; }
+    }
+    #chat .composer .message-form .send-icon:not(:disabled)::after {
+      content: ""; width: 18px; height: 18px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M9 14V4m-4 4 4-4 4 4' fill='none' stroke='white' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    #chat .dialogue { background-color: #c7b196; background-image: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22136%22%20height%3D%22124%22%20viewBox%3D%220%200%20136%20124%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%2381664f%22%20stroke-opacity%3D%22.21%22%20stroke-width%3D%221.15%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%0A%3Cpath%20transform%3D%22translate%289%2013%29%20rotate%28-13%2013%2013%29%22%20d%3D%22M13%2023C8%2019%203%2015%203%2010a5.2%205.2%200%200%201%2010-2%205.2%205.2%200%200%201%2010%202c0%205-5%209-10%2013Z%22%2F%3E%0A%3Cpath%20transform%3D%22translate%2878%209%29%20rotate%2812%2016%2016%29%22%20d%3D%22M2%2015c5.3-6%2011.2-6%2016.5-1.6%204.3%203.6%208.8%203.9%2013.5-.1M7%2021c4.5-4.6%209-4.8%2013.5-1.6%203%202.2%206.3%202.5%209.5.5%22%2F%3E%0A%3Cpath%20transform%3D%22translate%2852%2047%29%20rotate%28-8%2015%2016%29%22%20d%3D%22M5%2028c-1.7-2.7-2.8-4.8-.7-7.4%202.4-2.9%204-6%205.2-10.2l2.4-6.7c.6-1.7%202.8-1.3%202.8.5v11.2c0%204.9-1.9%208.5-5.4%2010.6L5%2028Zm20%200c1.7-2.7%202.8-4.8.7-7.4-2.4-2.9-4-6-5.2-10.2l-2.4-6.7c-.6-1.7-2.8-1.3-2.8.5v11.2c0%204.9%201.9%208.5%205.4%2010.6L25%2028Z%22%2F%3E%0A%3Cpath%20transform%3D%22translate%28102%2086%29%20rotate%2816%2010%2010%29%22%20d%3D%22M10%2019C6%2016%202%2012%202%208a4.2%204.2%200%200%201%208-2%204.2%204.2%200%200%201%208%202c0%204-4%208-8%2011Z%22%2F%3E%0A%3Cpath%20transform%3D%22translate%2812%2092%29%20rotate%28-10%2012%209%29%22%20d%3D%22M1%207c3.7-4.6%207.8-4.8%2011.7-1.1%203.5%203.3%207%203.6%2010.4.4M5%2013c3.2-3.2%206.2-3.3%209.3-.9%202.3%201.8%204.7%201.9%207.4.1%22%2F%3E%0A%3Cg%20transform%3D%22translate%2813%2047%29%20scale%28.54%29%20rotate%28-12%2031%2026%29%22%3E%0A%3Cpath%20d%3D%22M13%2046C16%2033%2025%2021%2041%2013c7-4%2013-6%2018-6-3%206-7%2011-13%2015%204-2%208-3%2013-3-5%207-13%2012-22%2015%204-1%208-1%2012%200-7%206-15%209-23%209-3%200-7%201-9%204-2%203-1%205%202%206%203%201%206-1%206-3%22%2F%3E%0A%3Cpath%20d%3D%22M19%2040c6-10%2013-16%2024-22M24%2038c6-6%2013-10%2020-12%22%2F%3E%0A%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E'), radial-gradient(ellipse at 16% 46%, #e5caa1 0%, #dbbf99 22%, transparent 66%), radial-gradient(ellipse at 94% 4%, #debfaa 0%, transparent 57%), linear-gradient(150deg, #c5aa8c 0%, #ccb396 49%, #bfa185 73%, #bea086 100%); background-size: 105px 96px, 100% 100%, 100% 100%, 100% 100%; background-repeat: repeat, no-repeat, no-repeat, no-repeat; }
+    .chat-turn .response { background-color: #fffdfa; }
+    .chat-turn.me .response, .chat-turn.me .face { background-color: #f8e9e7; }
+
+    @media (min-width: 641px) {
+      .top { height: 72px; }
+      #home { max-width: 640px; }
+      .hero { padding: clamp(22px, 4vh, 40px) 0 18px; }
+      .hero h1 { font-size: clamp(48px, 4.5vw, 62px); }
+      .hero h1 span { font-size: .72em; }
+      .hero .kicker { margin-bottom: 16px; }
+      .hero-copy > p:not(.kicker) { max-width: 560px; margin: 22px 0; }
+      #chat.focused { width: min(100%, 720px); height: calc(100dvh - 72px); padding-block: 18px 12px; }
+      #chat .chat-turn .response { max-width: min(78%, 540px); font-size: 16px; line-height: 1.5; }
+      #chat .dialogue { padding: 16px; }
+      #end { width: min(100%, 720px); padding-top: 22px; }
+      #end h1 { font-size: 42px; }
+      #end .kicker { margin-bottom: 10px; }
+      #end .ending-text { max-width: none; margin: 14px 0 18px; font-size: 16px; }
+      #end .outcome { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; padding: 18px 20px; margin-bottom: 14px; }
+      #end .outcome h2 { font-size: 17px; margin: 0; }
+      #next-step-title { grid-column: 1; grid-row: 1; }
+      #end .outcome > p:first-of-type { grid-column: 1; grid-row: 2 / 4; margin: 0; }
+      #end #outcome-title { grid-column: 2; grid-row: 1; }
+      #end .outcome-summary { grid-column: 2; grid-row: 2; min-width: 0; }
+      #end #outcome-thought { margin: 0; }
+      #end #outcome-note { grid-column: 2; grid-row: 3; margin: 0; }
+      #end #copy-outcome { grid-column: 1 / -1; grid-row: 4; margin-top: 6px; }
+      #end #outcome-status, #end #outcome-fallback { grid-column: 1 / -1; }
+      #end .final-share { font-size: 14px; padding-block: 10px; }
+    }
+    @media (min-width: 1000px) {
+      .header-menu > .menu-toggle { display: none; }
+      .header-menu .menu-panel { position: static; display: flex; align-items: center; gap: 24px; width: auto; padding: 0; background: transparent; border: 0; box-shadow: none; }
+      .menu-panel details { position: relative; }
+      .menu-panel details + details { border: 0; }
+      .menu-panel summary { gap: 10px; font-size: 14px; }
+      .menu-panel details[open] > summary { color: var(--accent); }
+      .menu-panel details[open] > p { position: absolute; top: calc(100% + 7px); right: 0; width: 340px; max-height: min(460px, calc(100dvh - 100px)); overflow-y: auto; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--white); box-shadow: 0 10px 28px #34221814; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+
+    body.contact-open { overflow: hidden; }
+    .contact-dialog { width: 500px; max-width: calc(100vw - 40px); max-height: calc(100dvh - 40px); padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--paper); color: var(--ink); overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 20px 80px #30252126; }
+    .contact-dialog::backdrop { background: #30252148; }
+    .contact-top { padding-right: 28px; }
+    .contact-top h2 { font: 500 32px/1.1 var(--serif); letter-spacing: -.035em; margin: 0; }
+    #contact-title:focus { outline: none; }
+    .contact-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; background: transparent; color: #77716b; }
+    @media (hover: hover) { .contact-close:hover { color: #171717; } }
+    .contact-intro { font-size: 15px; color: var(--muted); margin: 10px 0 22px; }
+    .contact-dialog label { display: block; margin: 18px 0 7px; font-size: 15px; font-weight: 600; }
+    .contact-dialog textarea, .contact-dialog input { display: block; width: 100%; border: 1px solid #d4c4b9; border-radius: 12px; padding: 12px 14px; font: 16px/1.5 "Segoe UI", sans-serif; color: var(--ink); background: var(--white); }
+    .contact-dialog textarea { min-height: 156px; resize: vertical; }
+    .contact-dialog input { min-height: 48px; }
+    .contact-dialog input:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .contact-hint { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+    .contact-dialog .primary { width: 100%; margin-top: 24px; }
+    #contact-status { font-size: 14px; color: var(--muted); margin: 14px 0 0; }
+    #contact-status:empty { display: none; }
+    @media (max-width: 640px) {
+      .contact-dialog { inset: 0 auto 0 0; width: min(100vw, var(--mobile-width, 375px)); height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 24px 20px max(24px, env(safe-area-inset-bottom)); border: 0; border-radius: 0; box-shadow: none; }
+      .contact-dialog textarea { min-height: 156px; }
+      .contact-top h2 { font-size: 26px; white-space: nowrap; }
+    }
+    @media (max-width: 360px) { .contact-top h2 { font-size: 22px; } }
+  </style>
+  <script>
+    function fitMobilePage() {
+      const root = document.documentElement;
+      const layoutWidth = root.clientWidth || window.innerWidth;
+      const viewport = window.visualViewport;
+      const screenWidth = window.screen.width;
+      const widths = [];
+
+      if (screenWidth >= 280 && screenWidth <= 640) widths.push(screenWidth);
+      if (viewport && Math.abs(viewport.scale - 1) < 0.02
+          && viewport.width >= 280 && viewport.width < layoutWidth - 1) {
+        widths.push(viewport.width);
+      }
+
+      // Embedded previews can report a layout wider than the visible device frame.
+      if (widths.length) {
+        root.style.setProperty('--mobile-width', Math.floor(Math.min(layoutWidth, ...widths)) + 'px');
+      } else {
+        root.style.removeProperty('--mobile-width');
+      }
+    }
+
+    fitMobilePage();
+    window.addEventListener('resize', fitMobilePage);
+    window.visualViewport?.addEventListener('resize', fitMobilePage);
+  </script>
+</head>
+<body>
+  <header class="top shell">
+    <div class="brand">
+      <span class="brand-portrait" aria-hidden="true"><img src="miron-avatar.jpg" width="36" height="36" alt=""></span>
+      <strong>Мирон</strong>
+    </div>
+    <details class="header-menu" id="header-menu">
+      <summary class="menu-toggle" aria-label="Меню">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </summary>
+      <nav class="menu-panel" aria-label="О практике">
+        <details name="menu-topic">
+          <summary>О Мироне</summary>
+          <p>Привет, я Мирон — мудрый друг и духовный наставник. Я выслушаю тебя и помогу услышать себя, когда трудно понять, что чувствуешь. Как поступить, решаешь ты.</p>
+        </details>
+        <details name="menu-topic">
+          <summary>Как это работает</summary>
+          <p>Я задам несколько вопросов, по одному за раз, а потом расскажу, что услышал в твоих ответах. Ты сможешь сказать, откликается ли это тебе. Если захочешь, я помогу найти слова, чтобы попросить поддержки у Высших Сил. Я верю и знаю, что Бог всегда слышит нас, когда мы обращаемся к Нему искренне, и помогает, когда это уместно.</p>
+        </details>
+        <details name="menu-topic">
+          <summary>Что с ответами?</summary>
+          <p>Твои ответы конфиденциальны. В этом макете они остаются в открытой вкладке и сбрасываются при обновлении страницы. Ты сам решаешь, чем поделиться. В конце можно скопировать итог и сохранить его у себя.</p>
+        </details>
+        <details name="menu-topic">
+          <summary>Связаться с автором</summary>
+          <p>Хочешь оставить отзыв, задать вопрос или предложить сотрудничество? <a class="contact-link" href="#contact" aria-haspopup="dialog">Напиши Александру</a>, создателю этой практики.</p>
+        </details>
+      </nav>
+    </details>
+  </header>
+
+  <main class="shell" id="main">
+    <section class="screen" id="home" aria-labelledby="home-title">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="kicker">Короткая практика с ИИ</p>
+          <h1 id="home-title" tabindex="-1">Услышать себя<span>и почувствовать поддержку</span></h1>
+          <p>После трудного разговора бывает непросто понять, что чувствуешь. Мирон задаст несколько вопросов, чтобы помочь тебе услышать себя. Если захочешь, он поможет найти слова, чтобы обратиться к Высшим Силам за поддержкой.</p>
+          <button class="primary" type="button" id="start">Начать <span class="arrow" aria-hidden="true">→</span></button>
+          <span class="timing">Выдели 5–10 минут</span>
+        </div>
+      </div>
+      <div class="quiet-note">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true"><path d="M20.8 8.8c0 4.3-8.8 9-8.8 9s-8.8-4.7-8.8-9a4.4 4.4 0 0 1 8.8-.5 4.4 4.4 0 0 1 8.8.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Один вопрос за раз. Можно своими словами, как получается.
+      </div>
+    </section>
+
+    <section class="screen focused" id="chat" aria-labelledby="chat-title" hidden>
+      <div class="chat-intro">
+        <p class="kicker">Беседа</p>
+        <div class="chat-title-row">
+          <h1 id="chat-title" tabindex="-1">Знакомство</h1>
+          <div class="chat-progress">
+            <span id="step-count" class="visually-hidden"></span>
+            <div class="progress-track" aria-hidden="true"><span id="chat-progress-fill"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="dialogue" id="chat-stream" role="log" aria-label="Переписка" tabindex="0"></div>
+      <div class="composer" id="composer">
+        <form id="answer-form">
+          <label class="visually-hidden" id="answer-label" for="answer">Твой ответ</label>
+          <textarea id="answer" rows="1" maxlength="5000" placeholder="Твой ответ" autocomplete="off" aria-describedby="answer-limit" required></textarea>
+          <button class="send" id="send" type="submit">Отправить</button>
+        </form>
+        <p id="answer-limit" class="answer-status" role="status" hidden></p>
+        <p id="answer-status" class="answer-status" role="status" hidden></p>
+      </div>
+    </section>
+
+    <section class="screen focused ending" id="end" aria-labelledby="end-title" hidden>
+      <p class="kicker">Завершение практики</p>
+      <h1 id="end-title" tabindex="-1">Дорогая Марина,</h1>
+      <p class="ending-text"><strong id="ending-achievement"></strong> <span id="ending-reflection"></span></p>
+      <section class="step-card outcome" aria-labelledby="next-step-title">
+        <h2 id="next-step-title">Твой следующий шаг</h2>
+        <p>Скажи маме, когда сможешь приехать, и оставь себе время на отдых.</p>
+        <h2 id="outcome-title">Сохрани то, что ты поняла о себе</h2>
+        <div class="outcome-summary">
+          <p id="outcome-thought"></p>
+          <button class="sample" id="expand-outcome" type="button" aria-expanded="false" aria-controls="outcome-thought" hidden>Показать полностью</button>
+        </div>
+        <p class="outcome-note" id="outcome-note"></p>
+        <button class="secondary" id="copy-outcome" type="button"><span id="copy-outcome-label">Скопировать итог</span><span class="copy-check" aria-hidden="true" hidden>✓</span></button>
+        <p id="outcome-status" role="status"></p>
+        <textarea id="outcome-fallback" rows="5" aria-label="Итог для копирования" readonly hidden></textarea>
+      </section>
+      <div class="quiet-note final-share">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true"><path d="M20.8 8.8c0 4.3-8.8 9-8.8 9s-8.8-4.7-8.8-9a4.4 4.4 0 0 1 8.8-.5 4.4 4.4 0 0 1 8.8.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <div>
+          <p>Кому из близких это может помочь?</p>
+          <button class="sample" id="share-practice" type="button" aria-controls="share-options" aria-expanded="false">Отправить ссылку на практику <span aria-hidden="true">↗</span></button>
+          <div class="share-options" id="share-options" hidden>
+            <a id="share-telegram" target="_blank" rel="noopener noreferrer">Telegram</a>
+            <a id="share-email">Почта</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="contact-dialog" id="contact" aria-labelledby="contact-title" aria-describedby="contact-intro">
+    <div class="contact-top">
+      <h2 id="contact-title" tabindex="-1">Написать Александру</h2>
+      <button class="contact-close" id="contact-close" type="button" aria-label="Закрыть форму"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <p class="contact-intro" id="contact-intro">Отзыв, вопрос или предложение о сотрудничестве — напиши здесь.</p>
+    <form id="contact-form">
+      <label for="contact-message">Твоё сообщение</label>
+      <textarea id="contact-message" name="message" rows="5" maxlength="3000" placeholder="Что хочешь рассказать или спросить?" required></textarea>
+      <label for="contact-address">Как с тобой связаться?</label>
+      <input id="contact-address" name="contact" type="text" maxlength="160" placeholder="Почта, Telegram или телефон" aria-describedby="contact-hint" required>
+      <p class="contact-hint" id="contact-hint">Достаточно одного контакта.</p>
+      <button class="primary" type="submit">Отправить</button>
+      <p id="contact-status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+
+
+  <script>
+    const demoName = 'Марина';
+    const mainThought = 'Я могу заботиться о маме и учитывать свою усталость. Спокойная уверенность поможет договориться о времени, на которое у меня есть силы.';
+    const intentionDraft = 'Высшие Силы, помогите мне спокойно сказать маме, когда я смогу приехать, и сохранить тепло между нами.';
+    const dialogue = [
+      { kind: 'name', title: 'Знакомство', text: ['Привет, я Мирон.'], question: 'Как тебя зовут?', example: demoName },
+      { title: 'Ситуация', addressByName: true, question: 'Расскажи, пожалуйста, подробнее, что произошло.', example: 'Мама попросила приехать разобрать вещи. Я предложила завтра, а она сказала, что на меня нельзя положиться. Я устала, но всё равно поехала.' },
+      { title: 'Чувства', text: ['Спасибо, что делишься.'], question: 'Какие чувства у тебя тогда возникли?', marinaQuestion: 'Что именно ты тогда почувствовала?', detail: 'Как и где это ощущалось в теле?', example: 'Я разозлилась и почувствовала вину. В горле встал ком.' },
+      { title: 'Взгляд со стороны', text: ['Взгляни на эту ситуацию со стороны.'], question: 'Что ты замечаешь в своей реакции?', example: 'Я сразу согласилась, хотя хотела отдохнуть. Мне важно помочь маме и сохранить с ней тепло, но я не сказала, что сил сегодня мало.' },
+      { title: 'Как тебе по душе', addressByName: true, question: 'Представь, что ситуация разрешилась идеально, как тебе по душе. Что изменилось?', example: 'Я говорю, что приеду завтра. Мама знает, что я помогу, а я сегодня спокойно отдыхаю.' },
+      { title: 'Твоя опора', question: 'На что в себе ты можешь опереться, чтобы приблизить такой исход?', detail: 'Какое качество или умение тебе бы помогло? Вспомни, когда оно уже тебе помогало.', example: 'На спокойную уверенность. Я уже так смогла договориться с коллегой, когда сказала, сколько времени мне нужно.' },
+      { kind: 'mirror', title: 'Что я услышал', text: [
+        'После маминых слов ты разозлилась, почувствовала вину и заметила ком в горле. Ты всё же поехала и не сказала, что сил в тот день было мало. При этом тебе важны и помощь маме, и тепло между вами.',
+        'Похоже, ты хочешь помочь и можешь выбрать время, когда у тебя будут силы. Спокойная уверенность может пригодиться здесь, когда нужно сказать, что ты готова сделать.'
+      ], question: 'Откликается?', example: 'Да, откликается.' },
+      { kind: 'draft', addressByName: true, text: ['Тогда предлагаю такой вариант Намерения. Можно заменить любое слово, например обращение, чтобы текст был тебе по душе.'],
+        question: 'Подходит? Напиши «да». Или пришли свой вариант.', detail: 'Чтобы пропустить, напиши «без».', example: 'Подходит.' },
+      { kind: 'intention', title: 'Твоё Намерение', text: ['Отлично. Теперь выдели минуту, когда тебя никто не побеспокоит.'], instruction: 'Произнеси Намерение Вслух — искренне, спокойно и уверенно.', detail: 'Когда закончишь, напиши «да».', example: 'Да.' }
+    ];
+
+    const screens = ['home', 'chat', 'end'];
+    const byId = id => document.getElementById(id);
+    const headerMenu = byId('header-menu');
+    const menuToggle = headerMenu.querySelector('summary');
+    const desktopMenu = window.matchMedia('(min-width: 1000px)');
+    function closeHeaderMenu() {
+      if (desktopMenu.matches) {
+        headerMenu.querySelectorAll('details[open]').forEach(item => { item.open = false; });
+      } else headerMenu.open = false;
+    }
+    function syncHeaderMenu() {
+      headerMenu.open = desktopMenu.matches;
+      closeHeaderMenu();
+    }
+    desktopMenu.addEventListener('change', syncHeaderMenu);
+    syncHeaderMenu();
+    document.addEventListener('click', event => {
+      if (!headerMenu.contains(event.target)) closeHeaderMenu();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && headerMenu.open) {
+        const openedItem = headerMenu.querySelector('details[open] > summary');
+        closeHeaderMenu();
+        if (desktopMenu.matches) openedItem?.focus();
+        else menuToggle.focus();
+      }
+    });
+    const contactDialog = byId('contact');
+    const contactForm = byId('contact-form');
+    const contactStatus = byId('contact-status');
+    document.querySelector('.contact-link').addEventListener('click', event => {
+      event.preventDefault();
+      closeHeaderMenu();
+      contactStatus.textContent = '';
+      contactDialog.showModal();
+      document.body.classList.add('contact-open');
+      byId('contact-title').focus({ preventScroll: true });
+    });
+    byId('contact-close').addEventListener('click', () => contactDialog.close());
+    contactDialog.addEventListener('close', () => {
+      if (contactDialog.open) return;
+      document.body.classList.remove('contact-open');
+      menuToggle.focus({ preventScroll: true });
+      if (desktopMenu.matches) headerMenu.querySelector('.contact-link').closest('details').querySelector('summary').focus({ preventScroll: true });
+    });
+    contactForm.addEventListener('submit', event => {
+      event.preventDefault();
+      for (const input of [byId('contact-message'), byId('contact-address')]) {
+        if (!input.value.trim()) {
+          input.setCustomValidity('Пожалуйста, заполни это поле.');
+          input.reportValidity();
+          return;
+        }
+      }
+      contactStatus.textContent = 'Спасибо! Форма заполнена. Это проверка макета — сообщение пока никуда не отправлено.';
+    });
+    contactForm.addEventListener('input', event => {
+      event.target.setCustomValidity('');
+      contactStatus.textContent = '';
+    });
+
+    const stream = byId('chat-stream');
+    const reviewAnswers = new Map();
+    let response;
+
+    const answer = byId('answer');
+    const form = byId('answer-form');
+    const send = byId('send');
+    const status = byId('answer-status');
+    let step = 0;
+    let pending = false;
+    let requestId = 0;
+    let name = demoName;
+    const isMarina = () => name.toLocaleLowerCase('ru-RU') === demoName.toLocaleLowerCase('ru-RU');
+    let thought = mainThought;
+    let proposedThought = mainThought;
+    let awaitingCorrection = false;
+    let quality = '';
+    let acceptedIntention = '';
+
+    function reset() {
+      requestId++;
+      stream.replaceChildren();
+      reviewAnswers.clear();
+      name = demoName;
+      thought = mainThought;
+      proposedThought = mainThought;
+      awaitingCorrection = false;
+      quality = '';
+      acceptedIntention = '';
+    }
+
+    function message(text = '', error = false) {
+      status.textContent = text;
+      status.hidden = !text;
+      status.dataset.error = String(error);
+    }
+
+    function setPending(value) {
+      pending = value;
+      answer.readOnly = value;
+      send.disabled = value;
+      form.setAttribute('aria-busy', String(value));
+      const icon = send.dataset.label === 'Отправить';
+      send.classList.toggle('send-icon', icon);
+      send.setAttribute('aria-label', send.dataset.label);
+      send.textContent = value ? (icon ? '…' : 'Ждём…') : icon ? '' : send.dataset.label;
+    }
+
+    function keepComposerVisible() {
+      if (document.activeElement === answer) {
+        document.activeElement.scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    function syncChatViewport() {
+      const viewport = window.visualViewport;
+      if (!viewport || Math.abs(viewport.scale - 1) < .02) {
+        const height = viewport?.height ?? window.innerHeight;
+        const localPreview = ['127.0.0.1', 'localhost'].includes(window.location.hostname);
+        // A mobile preview may expose a device screen shorter than the layout viewport.
+        const deviceHeight = window.screen.height;
+        const deviceWidth = window.screen.width;
+        const mobilePreview = localPreview && deviceWidth >= 280 && deviceWidth <= 640
+          && deviceHeight >= 360 && deviceHeight <= 1100;
+        // The Codex frame can clip the webview without changing its reported height.
+        const requestedHeight = Number(new URLSearchParams(window.location.search).get('height'));
+        const previewHeight = requestedHeight >= 360 && requestedHeight <= 1100
+          ? requestedHeight : mobilePreview ? deviceHeight : 667;
+        const visibleHeight = localPreview ? Math.min(height, previewHeight) : height;
+        document.documentElement.style.setProperty('--chat-height', visibleHeight + 'px');
+      }
+      keepComposerVisible();
+    }
+
+    window.addEventListener('resize', syncChatViewport);
+    window.visualViewport?.addEventListener('resize', syncChatViewport);
+    syncChatViewport();
+    function updateAnswerLimit() {
+      const remaining = answer.maxLength - answer.value.length;
+      const notice = byId('answer-limit');
+      notice.hidden = remaining > answer.maxLength * .1;
+      notice.textContent = remaining > 0
+        ? 'Осталось ' + remaining + ' из ' + answer.maxLength + ' символов.'
+        : 'Достигнут лимит в ' + answer.maxLength + ' символов. При необходимости сократи текст перед отправкой.';
+    }
+
+    function resizeMessage() {
+      updateAnswerLimit();
+      answer.style.height = '';
+      if (!form.classList.contains('message-form')) return;
+      const atLatest = stream.scrollHeight - stream.clientHeight - stream.scrollTop < 8;
+      if (CSS.supports('field-sizing', 'content')) { if (atLatest) scrollToLatest(); return; }
+      answer.style.height = '42px';
+      answer.style.height = Math.min(64, Math.max(42, answer.scrollHeight)) + 'px';
+      if (atLatest) scrollToLatest();
+    }
+
+    answer.addEventListener('input', resizeMessage);
+    answer.addEventListener('focus', keepComposerVisible);
+
+    function show(screen, focus = true) {
+      closeHeaderMenu();
+      document.body.dataset.activeScreen = screen;
+      for (const id of screens) byId(id).hidden = id !== screen;
+      window.scrollTo(0, 0);
+      if (focus) byId(screen + '-title').focus({ preventScroll: true });
+    }
+
+    function scrollToLatest() {
+      stream.scrollTop = stream.scrollHeight;
+    }
+
+    function addTurn(who, text = '') {
+      const row = document.createElement('div');
+      row.className = 'chat-turn' + (who === 'user' ? ' me' : '');
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', who === 'user' ? 'Твой ответ' : 'Мирон');
+      const bubble = document.createElement('div');
+      bubble.className = 'response';
+      bubble.textContent = text;
+      if (who === 'user') {
+        const avatar = document.createElement('span');
+        avatar.className = 'face';
+        avatar.setAttribute('aria-hidden', 'true');
+        avatar.textContent = 'Я';
+        row.append(bubble, avatar);
+      } else {
+        const avatar = document.createElement('img');
+        avatar.className = 'face speaker-avatar';
+        avatar.src = 'miron-avatar.jpg';
+        avatar.alt = '';
+        avatar.width = 26;
+        avatar.height = 26;
+        row.append(avatar, bubble);
+      }
+      stream.append(row);
+      return bubble;
+    }
+
+    function addText(tag, content, emphasis = false) {
+      const element = document.createElement(tag);
+      const phrase = emphasis === true ? content : emphasis;
+      const start = phrase ? content.indexOf(phrase) : -1;
+      if (start !== -1) {
+        const strong = document.createElement('strong');
+        strong.textContent = phrase;
+        element.append(content.slice(0, start), strong, content.slice(start + phrase.length));
+      } else {
+        element.textContent = content;
+      }
+      response.append(element);
+    }
+
+    function tomorrowText() {
+      return /спокойн\S*\s+уверенн/iu.test(quality)
+        ? 'Если захочешь, завтра можешь заметить, была ли в твоём дне спокойная уверенность.'
+        : 'Если захочешь, завтра можешь вспомнить о названном качестве и заметить, проявилось ли оно.';
+    }
+
+    function renderMirror() {
+      const item = dialogue[step];
+      const paragraphs = isMarina() ? item.text : [
+        'Мамины слова вызвали злость и чувство вины. В горле встал ком. При этом тебе важны и помощь маме, и тепло между вами.',
+        'Похоже, можно помочь маме и выбрать время, когда у тебя будут силы. Спокойная уверенность может помочь и здесь.'
+      ];
+      const lead = quality === dialogue[5].example
+        ? 'С коллегой тебе уже удалось спокойно сказать, сколько времени тебе нужно. Вот что я услышал.'
+        : 'Вот что я услышал.';
+      addText('p', lead);
+      const keyPhrase = isMarina()
+        ? 'ты хочешь помочь и можешь выбрать время, когда у тебя будут силы'
+        : 'можно помочь маме и выбрать время, когда у тебя будут силы';
+      for (const paragraph of paragraphs) addText('p', paragraph, keyPhrase);
+      if (proposedThought !== mainThought) {
+        addText('p', 'Твоя поправка', true);
+        addText('blockquote', proposedThought);
+      }
+      addText('p', tomorrowText());
+      addText('p', item.question, true);
+    }
+
+    function showStep(index, lastAnswer = '', focus = true) {
+      step = index;
+      awaitingCorrection = false;
+      const item = dialogue[index];
+      const draft = item.kind === 'draft';
+      const mirror = item.kind === 'mirror';
+      const intention = item.kind === 'intention';
+      byId('chat-title').textContent = item.kind === 'name' ? 'Знакомство'
+        : item.kind === 'mirror' ? 'Что я услышал'
+        : draft || intention ? 'Намерение' : 'Ситуация';
+      const currentStep = index + 1;
+      byId('step-count').textContent = 'Шаг ' + currentStep + ' из ' + dialogue.length;
+      byId('chat-progress-fill').style.width = (currentStep / dialogue.length * 100) + '%';
+      const userTurn = lastAnswer ? addTurn('user', lastAnswer).parentElement : null;
+      response?.removeAttribute('id');
+      response = addTurn('miron');
+      response.id = 'response';
+      if (mirror) renderMirror();
+      else {
+        const paragraphs = item.text ?? [];
+        const addressByName = phrase => name + ', ' + phrase[0].toLocaleLowerCase('ru-RU') + phrase.slice(1);
+        paragraphs.forEach((paragraph, i) => {
+          addText('p', item.addressByName && i === 0 ? addressByName(paragraph) : paragraph);
+        });
+        if (item.instruction) addText('p', item.instruction, 'Произнеси Намерение Вслух');
+        if (draft || intention) addText('blockquote', draft ? (acceptedIntention || intentionDraft) : acceptedIntention);
+        if (item.question) {
+          const question = (isMarina() && item.marinaQuestion) || item.question;
+          const wording = item.addressByName && !paragraphs.length ? addressByName(question) : question;
+          addText('p', wording, draft ? 'Подходит? Напиши «да».' : true);
+        }
+        if (item.detail) addText('p', item.detail);
+      }
+      form.classList.add('message-form');
+      answer.value = '';
+      answer.maxLength = item.kind === 'name' ? 120 : 5000;
+      send.dataset.label = 'Отправить';
+      answer.setAttribute('enterkeyhint', 'send');
+
+      requestId++;
+      setPending(false);
+      message();
+      show('chat', focus);
+      resizeMessage();
+      if ((mirror || draft || intention) && userTurn) {
+        stream.scrollTop += userTurn.getBoundingClientRect().top - stream.getBoundingClientRect().top
+          - stream.clientTop - parseFloat(getComputedStyle(stream).paddingTop);
+      } else scrollToLatest();
+    }
+
+    const copyOutcomeLabel = byId('copy-outcome-label');
+    const copyOutcomeCheck = byId('copy-outcome').querySelector('.copy-check');
+    let copyOutcomeTimer;
+
+    function clearCopy(statusId, fallbackId) {
+      byId(statusId).textContent = '';
+      byId(fallbackId).hidden = true;
+      byId(fallbackId).value = '';
+    }
+
+    function endingAfterIntention() {
+      const source = acceptedIntention.match(/^(Высшие\s+Силы|Боже|Бог|Господи|Господь|Отец|Творец|Вселенная)(?=[\s,.:!—-]|$)/iu);
+      const sources = {
+        'высшие силы': 'к Высшим Силам',
+        'боже': 'к Богу',
+        'бог': 'к Богу',
+        'господи': 'к Богу',
+        'господь': 'к Богу',
+        'отец': 'к Отцу',
+        'творец': 'к Творцу',
+        'вселенная': 'к Вселенной'
+      };
+      let ending = 'после произнесения Намерения';
+      if (source) {
+        const key = source[1].toLocaleLowerCase('ru-RU').replace(/\s+/g, ' ');
+        ending = 'после обращения ' + sources[key];
+      } else {
+        const ownAddress = acceptedIntention.match(/^([^,.!?\n]{1,60})[,\n]/u);
+        if (ownAddress) ending = 'после обращения «' + ownAddress[1].trim() + '»';
+      }
+      return 'Можно побыть наедине с собой и заметить, что ты сейчас чувствуешь ' + ending + '.';
+    }
+
+    function updateOutcomeDisclosure() {
+      if (document.body.dataset.activeScreen !== 'end') return;
+      const paragraph = byId('outcome-thought');
+      byId('expand-outcome').hidden = !paragraph.classList.contains('expanded')
+        && paragraph.scrollHeight <= paragraph.clientHeight + 1;
+    }
+
+    byId('expand-outcome').addEventListener('click', () => {
+      const expanded = byId('outcome-thought').classList.toggle('expanded');
+      byId('expand-outcome').setAttribute('aria-expanded', String(expanded));
+      byId('expand-outcome').textContent = expanded ? 'Свернуть' : 'Показать полностью';
+      updateOutcomeDisclosure();
+    });
+    window.addEventListener('resize', updateOutcomeDisclosure);
+
+    function showEnding(focus = true) {
+      const prayed = Boolean(acceptedIntention);
+      const masculine = name.toLocaleLowerCase('ru-RU') === 'александр';
+      byId('end-title').textContent = isMarina() ? 'Дорогая Марина,' : masculine ? 'Дорогой Александр,' : name + ',';
+      byId('ending-achievement').textContent = prayed
+        ? (isMarina() ? 'Ты сделала главное.' : masculine ? 'Ты сделал главное.' : 'Главное уже сделано.')
+        : 'Спасибо за внимание к себе.';
+      byId('ending-reflection').textContent = prayed
+        ? endingAfterIntention()
+        : 'Можно побыть наедине с собой и прислушаться к своим ощущениям.';
+      byId('outcome-title').textContent = isMarina() ? 'Сохрани то, что ты поняла о себе'
+        : masculine ? 'Сохрани то, что ты понял о себе' : 'Сохрани своё открытие';
+      byId('outcome-thought').textContent = thought;
+      byId('outcome-thought').classList.remove('expanded');
+      byId('expand-outcome').setAttribute('aria-expanded', 'false');
+      byId('expand-outcome').textContent = 'Показать полностью';
+      byId('outcome-note').textContent = prayed ? 'В итоге — твоя главная мысль и Намерение. Скопируй и вставь в заметки или файл.'
+        : 'В итоге — твоя главная мысль. Скопируй и вставь в заметки или файл.';
+      showShareOptions(false);
+      clearCopy('outcome-status', 'outcome-fallback');
+      clearTimeout(copyOutcomeTimer);
+      copyOutcomeLabel.textContent = 'Скопировать итог';
+      copyOutcomeCheck.hidden = true;
+      show('end', focus);
+      updateOutcomeDisclosure();
+    }
+
+    function answerKind(text) {
+      const normalized = text.toLocaleLowerCase('ru-RU')
+        .replace(/[.,!?…«»"“”]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (/^(без|без намерения)$/u.test(normalized)) return 'skip';
+      const refusals = [
+        'нет', 'нет не откликается', 'нет не подходит', 'нет не совсем',
+        'не откликается', 'не подходит', 'не совсем', 'не то',
+        'не согласен', 'не согласна', 'пока нет'
+      ];
+      if (refusals.includes(normalized)) return 'no';
+      const confirmations = [
+        'да', 'да откликается', 'откликается', 'да подходит', 'подходит',
+        'ага', 'угу', 'верно', 'всё верно', 'все верно', 'да верно', 'правильно',
+        'да всё верно', 'да все верно', 'всё так', 'все так', 'да всё так', 'да все так',
+        'да спасибо', 'да это про меня', 'точно', 'согласен', 'согласна', 'хорошо', 'ок', 'окей'
+      ];
+      if (confirmations.includes(normalized)) return 'yes';
+      if (/^(да )?(я )?(готово|готов|готова|сделал|сделала|произнес|произнёс|произнесла|закончил|закончила|прочитал|прочитала)$/u.test(normalized)) return 'done';
+      return 'text';
+    }
+
+    function beginReply(text) {
+      addTurn('user', text);
+      response?.removeAttribute('id');
+      response = addTurn('miron');
+      response.id = 'response';
+      answer.value = '';
+      resizeMessage();
+    }
+
+    async function advance(value) {
+      const text = value.trim();
+      if (pending || !text) return;
+      if (text.length > answer.maxLength) {
+        message('В ответе больше ' + answer.maxLength + ' символов. Сократи текст перед отправкой.', true);
+        return;
+      }
+      const currentRequest = ++requestId;
+      const item = dialogue[step];
+      const kind = answerKind(text);
+      answer.value = value;
+      setPending(true);
+      message('Мирон готовит ответ…');
+      await new Promise(resolve => setTimeout(resolve, 550));
+      if (currentRequest !== requestId) return;
+      setPending(false);
+      message();
+      if (item.kind === 'intention') {
+        if (kind === 'yes' || kind === 'done') {
+          reviewAnswers.set(step, text);
+          showEnding();
+        } else {
+          beginReply(text);
+          addText('p', 'Когда произнесёшь Намерение вслух, напиши «да» или «готово».');
+          scrollToLatest();
+        }
+      } else if (item.kind === 'mirror') {
+        if (kind === 'no' || (kind === 'yes' && awaitingCorrection)) {
+          awaitingCorrection = true;
+          beginReply(text);
+          addText('p', 'Что в отражении звучит иначе? Напиши, что поправить.', true);
+          scrollToLatest();
+        } else if (kind === 'yes') {
+          thought = proposedThought;
+          reviewAnswers.set(step, text);
+          showStep(step + 1, text);
+        } else {
+          proposedThought = text;
+          awaitingCorrection = false;
+          beginReply(text);
+          addText('p', 'Вот твоя поправка.');
+          addText('blockquote', proposedThought);
+          addText('p', 'Так верно? Напиши «да» или уточни своими словами.', true);
+          scrollToLatest();
+        }
+      } else if (item.kind === 'draft') {
+        if (kind === 'skip') {
+          acceptedIntention = '';
+          reviewAnswers.set(step, text);
+          showEnding();
+        } else if (kind === 'no' || (kind === 'yes' && awaitingCorrection)) {
+          awaitingCorrection = true;
+          beginReply(text);
+          addText('p', 'Что поменять в Намерении? Пришли свой вариант.', true);
+          scrollToLatest();
+        } else {
+          acceptedIntention = kind === 'yes' ? (acceptedIntention || intentionDraft) : text;
+          reviewAnswers.set(step, text);
+          showStep(step + 1, text);
+        }
+      } else {
+        reviewAnswers.set(step, text);
+        if (item.kind === 'name') name = text;
+        if (step === 5) quality = text;
+        showStep(step + 1, text);
+      }
+    }
+
+    const practiceLink = 'https://mirone.ru/';
+    async function copyText(value, statusId, fallbackId, success) {
+      const notice = byId(statusId);
+      const fallback = byId(fallbackId);
+      try {
+        await navigator.clipboard.writeText(value);
+        fallback.hidden = true;
+        notice.textContent = success;
+        return true;
+      } catch {
+        fallback.value = value;
+        fallback.hidden = false;
+        notice.textContent = 'Можешь скопировать текст из поля.';
+        fallback.focus();
+        fallback.select();
+        return false;
+      }
+    }
+
+    byId('start').addEventListener('click', () => {
+      reset();
+      showStep(0);
+    });
+    byId('copy-outcome').addEventListener('click', async () => {
+      const value = 'Главная мысль\n' + thought + (acceptedIntention ? '\n\nНамерение\n' + acceptedIntention : '');
+      const copied = await copyText(value, 'outcome-status', 'outcome-fallback', 'Итог скопирован.');
+      clearTimeout(copyOutcomeTimer);
+      byId('outcome-status').classList.toggle('visually-hidden', copied);
+      copyOutcomeCheck.hidden = !copied;
+      copyOutcomeLabel.textContent = copied ? 'Скопировано' : 'Скопировать итог';
+      if (copied) {
+        copyOutcomeTimer = setTimeout(() => {
+          copyOutcomeLabel.textContent = 'Скопировать итог';
+        }, 2000);
+      }
+    });
+    const shareButton = byId('share-practice');
+    const shareOptions = byId('share-options');
+    byId('share-telegram').href = 'https://t.me/share/url?url=' + encodeURIComponent(practiceLink);
+    byId('share-email').href = 'mailto:?subject=' + encodeURIComponent('Практика с Мироном')
+      + '&body=' + encodeURIComponent(practiceLink);
+
+    function showShareOptions(visible) {
+      shareOptions.hidden = !visible;
+      shareButton.setAttribute('aria-expanded', String(visible));
+    }
+
+    shareButton.addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({ url: practiceLink });
+          return;
+        } catch (error) {
+          if (error.name === 'AbortError') return;
+        }
+      }
+      showShareOptions(shareOptions.hidden);
+    });
+    answer.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && send.dataset.label === 'Отправить') {
+        event.preventDefault();
+        if (!pending) form.requestSubmit();
+      }
+    });
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      advance(answer.value);
+    });
+
+    function openPreview(screen, focus = true) {
+      reset();
+      if (screen === 'chat' || screen === 'tomorrow') {
+        quality = dialogue[5].example;
+        showStep(6, quality, focus);
+      } else if (screen === 'intention') {
+        showStep(7, 'Да, откликается.', focus);
+      } else if (screen === 'confirm-intention') {
+        acceptedIntention = intentionDraft;
+        showStep(8, 'Подходит.', focus);
+      } else if (screen === 'end') {
+        acceptedIntention = intentionDraft;
+        showEnding(focus);
+      } else show('home', focus);
+    }
+
+    const preview = new URLSearchParams(window.location.search);
+    const avatar = preview.get('avatar');
+    if (avatar === 'mono' || avatar === 'beige') byId('chat').dataset.avatar = avatar;
+    openPreview(preview.get('screen'), false);
+  </script>
+</body>
+</html>
