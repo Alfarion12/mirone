@@ -44,7 +44,8 @@
     [hidden] { display: none !important; }
     .shell { width: calc(100% - 64px); max-width: 1060px; margin-inline: auto; }
     .top { display: flex; align-items: center; justify-content: space-between; height: 80px; border-bottom: 1px solid var(--line); }
-    .brand { display: inline-flex; align-items: center; gap: 10px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+    .brand:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 4px; }
     .brand-portrait { position: relative; display: block; flex: none; width: 36px; height: 36px; }
     .brand-portrait img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     .brand-portrait::after { content: ""; position: absolute; right: -1px; bottom: -1px; width: 7px; height: 7px; background: #419451; border: 2px solid var(--paper); border-radius: 50%; }
@@ -356,10 +357,10 @@
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="prayer-ink" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 -3 -1 0 5.7"/><feComponentTransfer result="mask"><feFuncA type="linear" slope="1.15" intercept="0"/></feComponentTransfer><feFlood flood-color="#91482f"/><feComposite in2="mask" operator="in"/></filter></defs></svg>
   <header class="top shell">
-    <div class="brand">
+    <a class="brand" id="brand-home" href="./" aria-label="Мирон — на главную">
       <span class="brand-portrait" aria-hidden="true"><img src="miron-avatar.jpg" width="36" height="36" alt=""></span>
       <strong>Мирон</strong>
-    </div>
+    </a>
     <details class="header-menu" id="header-menu">
       <summary class="menu-toggle" aria-label="Меню">
         <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
@@ -1205,6 +1206,13 @@
         message(error.message==='SESSION_EXPIRED'?'Беседа завершилась по времени. Обнови страницу, чтобы начать заново.':'Ответ не получен. Твой текст сохранён — можно отправить ещё раз.',true);
       } finally {setPending(false);resizeMessage();}
     }
+
+    // Reload at home so an in-flight reply cannot reopen the previous conversation.
+    const homeURL = new URL(window.location.href);
+    homeURL.searchParams.delete('screen');
+    homeURL.searchParams.delete('qaStart');
+    homeURL.hash = '';
+    byId('brand-home').href = homeURL.href;
 
     const preview = new URLSearchParams(window.location.search);
     const avatar = preview.get('avatar');
