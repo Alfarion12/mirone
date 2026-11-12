@@ -1116,8 +1116,10 @@
     }
 
 
-    // A live session uses server-owned state. Editor previews remain available without ?live=1.
-    const liveMode = ['127.0.0.1','localhost'].includes(location.hostname) && new URLSearchParams(location.search).get('live') === '1';
+    // The public site uses the private VPS API; local editor previews still require ?live=1.
+    const publicLive = location.hostname === 'mirone.ru';
+    const liveMode = publicLive || (['127.0.0.1','localhost'].includes(location.hostname) && new URLSearchParams(location.search).get('live') === '1');
+    const apiEndpoint = publicLive ? 'https://api.mirone.ru/api/chat' : '/api/chat';
     let liveSession = null, liveCount = 0, liveRetry = null;
     function appendInline(element, text) {
       for (const part of text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_)/g)) {
@@ -1152,7 +1154,7 @@
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 115000);
       try {
-        const res = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'},
+        const res = await fetch(apiEndpoint, { method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify(data), signal:controller.signal, cache:'no-store' });
         const result = await res.json();
         if (!res.ok) throw new Error(result.error || 'REQUEST_FAILED');
