@@ -396,12 +396,13 @@
         <details name="menu-topic" data-topic="privacy" hidden>
           <summary>Конфиденциальность</summary>
           <div class="menu-content">
-          <p>Твои ответы - твоя территория. Они остаются конфиденциальны и сбрасываются при обновлении страницы. Ты сам решаешь, чем поделиться.</p>
+          <p>Переписка сохраняется в архив и доступна только автору сервиса, используется для улучшения сервиса и не публикуется.</p>
           </div>
         </details>
         <details name="menu-topic">
           <summary>Связаться с автором</summary>
           <div class="menu-content">
+          <p>Переписка сохраняется в архив и доступна только автору сервиса, используется для улучшения сервиса и не публикуется.</p>
           <p>Хочешь оставить отзыв, задать вопрос или предложить сотрудничество? <a class="contact-link" href="#contact" aria-haspopup="dialog">Напиши Александру</a>, создателю этой практики.</p>
           </div>
         </details>
@@ -563,20 +564,37 @@
       menuToggle.focus({ preventScroll: true });
       if (desktopMenu.matches) headerMenu.querySelector('.contact-link').closest('details').querySelector('summary').focus({ preventScroll: true });
     });
-    contactForm.addEventListener('submit', event => {
+    let contactBusy = false, contactRequestId = null;
+    const contactSubmit = contactForm.querySelector('button[type="submit"]');
+    contactForm.addEventListener('submit', async event => {
       event.preventDefault();
-      for (const input of [byId('contact-message'), byId('contact-address')]) {
-        if (!input.value.trim()) {
-          input.setCustomValidity('Пожалуйста, заполни это поле.');
-          input.reportValidity();
-          return;
-        }
+      if (contactBusy) return;
+      const inputs = [byId('contact-message'), byId('contact-address')];
+      for (const input of inputs) {
+        if (!input.value.trim()) { input.setCustomValidity('Пожалуйста, заполни это поле.'); input.reportValidity(); return; }
       }
-      contactStatus.textContent = 'Спасибо! Форма заполнена. Это проверка макета — сообщение пока никуда не отправлено.';
+      contactRequestId ||= crypto.randomUUID();
+      contactBusy = true; contactSubmit.disabled = true; contactSubmit.textContent = 'Отправляем…';
+      inputs.forEach(input => input.readOnly = true);
+      const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 35000);
+      let sent = false;
+      try {
+        const endpoint = publicLive ? 'https://api.mirone.ru/api/contact' : '/api/contact';
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestId: contactRequestId, message: inputs[0].value.trim(), contact: inputs[1].value.trim() }),
+          signal: controller.signal, cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error('SEND_FAILED');
+        sent = true; contactStatus.textContent = 'Спасибо! Сообщение отправлено Александру.';
+      } catch { contactStatus.textContent = 'Не удалось отправить. Текст сохранён — попробуй ещё раз чуть позже.'; }
+      finally {
+        clearTimeout(timer); contactBusy = false; inputs.forEach(input => input.readOnly = false);
+        contactSubmit.disabled = sent; contactSubmit.textContent = sent ? 'Отправлено' : 'Отправить';
+      }
     });
     contactForm.addEventListener('input', event => {
-      event.target.setCustomValidity('');
-      contactStatus.textContent = '';
+      event.target.setCustomValidity(''); contactStatus.textContent = '';
+      if (!contactBusy) { contactRequestId = null; contactSubmit.disabled = false; contactSubmit.textContent = 'Отправить'; }
     });
 
     const stream = byId('chat-stream');
