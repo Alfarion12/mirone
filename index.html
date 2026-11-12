@@ -63,6 +63,7 @@
     .menu-panel summary::after { content: ""; width: 6px; height: 6px; margin-right: 3px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(45deg); }
     .menu-panel details[open] > summary::after { transform: rotate(225deg); }
     .menu-panel .contact-link { color: var(--accent-dark); text-decoration: underline; text-underline-offset: 3px; }
+    .menu-panel .menu-content p:last-child { margin-bottom: 0; }
     .menu-panel p { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.5; }
     main.shell { padding-bottom: 24px; }
     .screen { min-width: 0; }
@@ -297,7 +298,7 @@
       .menu-panel details + details { border: 0; }
       .menu-panel summary { gap: 10px; font-size: 14px; }
       .menu-panel details[open] > summary { color: var(--accent); }
-      .menu-panel details[open] > p { position: absolute; top: calc(100% + 7px); right: 0; width: 340px; max-height: min(460px, calc(100dvh - 100px)); overflow-y: auto; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--white); box-shadow: 0 10px 28px #34221814; }
+      .menu-panel details[open] > .menu-content { position: absolute; top: calc(100% + 7px); right: 0; width: 340px; max-height: min(460px, calc(100dvh - 100px)); overflow-y: auto; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--white); box-shadow: 0 10px 28px #34221814; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
 
@@ -368,24 +369,32 @@
       <nav class="menu-panel" aria-label="О практике">
         <details name="menu-topic">
           <summary>О Мироне</summary>
+          <div class="menu-content">
           <p>Привет, я Мирон — мудрый друг и духовный наставник. Я выслушаю тебя и помогу услышать себя, когда на душе неспокойно. Вместе мы попробуем понять, что для тебя важно и на что ты можешь опереться.</p>
           <p>Возвращайся в трудных ситуациях или просто когда захочешь остановиться, прислушаться к себе и почувствовать поддержку.</p>
+          </div>
         </details>
         <details name="menu-topic">
           <summary>Как это работает</summary>
+          <div class="menu-content">
           <p>Я задам несколько вопросов, по одному за раз, чтобы помочь тебе прислушаться к себе и яснее понять свою ситуацию. Потом расскажу, что услышал в твоих ответах, и помогу заметить важные связи. Ты сможешь сказать, откликается ли тебе это.</p>
           <p>Если захочешь, мы подготовим твоё Намерение — обращение к Высшим Силам. Ты сможешь изменить любые слова, чтобы они были по душе. Затем я подскажу, как выразить его искренне и осознанно. В основе подхода — глубокая и действенная духовная практика вне религии. Мой создатель вложил сюда то, что прошёл сам и что приносит реальные результаты.</p>
           <p>Я знаю, что Бог всегда рядом и слышит нас, когда мы обращаемся к нему искренне, и помогает, когда это уместно. Просить можно и о малом, и о большом. При этом конкретные ощущения, способ помощи, результат или срок не гарантированы. У каждого — свой индивидуальный опыт.</p>
           <p>В конце ты сможешь сохранить то, что понял о себе, вместе со своим Намерением. К этим словам можно вернуться, когда снова понадобится опора. Как поступить дальше, решаешь ты.</p>
           <p>Ты можешь приходить с новой ситуацией или вернуться к той же — чтобы понять, что теперь чувствуешь, заметить привычную реакцию и найти свой следующий шаг.</p>
+          </div>
         </details>
         <details name="menu-topic" data-topic="privacy" hidden>
           <summary>Конфиденциальность</summary>
+          <div class="menu-content">
           <p>Твои ответы - твоя территория. Они остаются конфиденциальны и сбрасываются при обновлении страницы. Ты сам решаешь, чем поделиться.</p>
+          </div>
         </details>
         <details name="menu-topic">
           <summary>Связаться с автором</summary>
+          <div class="menu-content">
           <p>Хочешь оставить отзыв, задать вопрос или предложить сотрудничество? <a class="contact-link" href="#contact" aria-haspopup="dialog">Напиши Александру</a>, создателю этой практики.</p>
+          </div>
         </details>
       </nav>
     </details>
