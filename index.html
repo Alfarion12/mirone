@@ -658,6 +658,7 @@
       if (value) {
         send.append(byId('wait-prayer-template').content.firstElementChild.cloneNode(true));
       } else if (!icon) send.textContent = send.dataset.label;
+      updateLiveReviewControls();
     }
 
     function keepComposerVisible() {
@@ -720,6 +721,7 @@
       reviewBar.hidden = !reviewEnabled;
       reviewPrev.hidden = screen === 'home';
       reviewNext.hidden = screen === 'end';
+      updateLiveReviewControls();
       for (const id of screens) byId(id).hidden = id !== screen;
       window.scrollTo(0, 0);
       if (focus) byId(screen + '-title').focus({ preventScroll: true });
@@ -925,7 +927,7 @@
     }
 
     async function advance(value) {
-      if (liveMode && !reviewEnabled) return advanceLive(value);
+      if (liveMode) return advanceLive(value);
       const text = value.trim();
       if (pending || !text) return;
       if (text.length > answer.maxLength) {
@@ -1013,7 +1015,7 @@
     }
 
     byId('start').addEventListener('click', () => {
-      if (liveMode && !reviewEnabled) { startLive(); return; }
+      if (liveMode) { startLive(); return; }
       reset();
       showStep(0);
       if (reviewEnabled) {answer.value=dialogue[0].example;resizeMessage();}
@@ -1130,13 +1132,23 @@
         reviewEnabled=!reviewEnabled;
         reviewBar.hidden=!reviewEnabled;
         reviewPrev.hidden=true;reviewNext.hidden=false;
+        updateLiveReviewControls();
       }
     });
 
-    reviewPrev.addEventListener('click', () => moveReview(-1));
+    reviewPrev.addEventListener('click', () => {
+      if (!liveMode) moveReview(-1);
+    });
     reviewNext.addEventListener('click', () => {
       if (document.body.dataset.activeScreen === 'home') byId('start').click();
-      else moveReview(1);
+      else if (liveMode) {
+        if (pending || liveStarting || !liveSession) return;
+        const value = answer.value.trim() ? answer.value : liveReviewExample();
+        if (!value) return;
+        answer.value = value;
+        resizeMessage();
+        advanceLive(value);
+      } else moveReview(1);
     });
 
     function openPreview(screen, focus = true) {
@@ -1161,6 +1173,21 @@
     const liveMode = publicLive || (['127.0.0.1','localhost'].includes(location.hostname) && new URLSearchParams(location.search).get('live') === '1');
     const apiEndpoint = publicLive ? 'https://api.mirone.ru/api/chat' : '/api/chat';
     let liveSession = null, liveCount = 0, liveRetry = null;
+    let liveStage = 'name', liveStarting = false;
+    function liveReviewExample() {
+      const stages = ['name','q1','q2','q3','q4','q5','mirror','draft','speak'];
+      const index = stages.indexOf(liveStage);
+      return index < 0 ? '' : dialogue[index].example || '';
+    }
+    function updateLiveReviewControls() {
+      if (!liveMode) return;
+      // A completed server turn cannot be rewound by changing the visual fixture.
+      reviewPrev.disabled = true;
+      reviewPrev.title = 'В живой беседе предыдущие ответы остаются выше в чате';
+      reviewNext.disabled = pending || liveStarting;
+      reviewNext.title = document.body.dataset.activeScreen === 'home'
+        ? 'Начать живую тестовую беседу' : 'Отправить подготовленный ответ в живой API';
+    }
     function appendInline(element, text) {
       for (const part of text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_)/g)) {
         if (!part) continue;
@@ -1203,6 +1230,7 @@
     }
     function renderLive(data) {
       liveSession = data.sessionId;
+      liveStage = data.stage;
       if (data.startedAt) conversationStartedAt = data.startedAt;
       name = data.name || ''; const newRows = [];
       for (const turn of data.messages.slice(liveCount)) {
@@ -1236,15 +1264,19 @@
       }
       const controls = byId('review-arrows');
       if (controls) controls.hidden = !reviewEnabled;
+      updateLiveReviewControls();
     }
     async function startLive() {
+      if (liveStarting || pending) return;
+      liveStarting = true;
+      updateLiveReviewControls();
       const button = byId('start'); button.disabled = true;
       try {
         const data = await apiChat({action:'start'});
-        reset();liveCount=0;liveRetry=null;renderLive(data);setPending(false);answer.value='';resizeMessage();
+        reset();liveCount=0;liveRetry=null;renderLive(data);setPending(false);answer.value=reviewEnabled?liveReviewExample():'';resizeMessage();
       } catch {
         button.textContent = 'Не удалось подключиться. Попробовать ещё раз';
-      } finally {button.disabled=false;}
+      } finally {button.disabled=false;liveStarting=false;updateLiveReviewControls();}
     }
     async function advanceLive(value) {
       const text=value.trim();
@@ -1255,7 +1287,7 @@
       setPending(true);message();
       try {
         const data=await apiChat(payload);
-        renderLive(data);answer.value='';liveRetry=null;message();
+        renderLive(data);answer.value=reviewEnabled?liveReviewExample():'';liveRetry=null;message();
       } catch(error) {
         message(error.message==='SESSION_EXPIRED'?'Беседа завершилась по времени. Обнови страницу, чтобы начать заново.':'Ответ не получен. Твой текст сохранён — можно отправить ещё раз.',true);
       } finally {setPending(false);resizeMessage();}
