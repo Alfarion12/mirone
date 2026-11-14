@@ -177,7 +177,7 @@
     .copy-check { position: absolute; inset-inline-end: 14px; top: 50%; transform: translateY(-50%); color: #287648; font-size: 20px; }
     .final-share { display: grid; grid-template-columns: 19px minmax(0, 1fr) 19px; gap: 8px; width: 100%; text-align: center; }
     @media (hover: hover) {
-      #copy-outcome:hover { background: #f0dcd1; border-color: var(--accent); }
+      #email-outcome:hover { background: #f0dcd1; border-color: var(--accent); }
       .final-share .sample:hover { color: var(--accent); text-decoration-thickness: 2px; }
     }
     .final-share p { margin: 0; }
@@ -201,8 +201,16 @@
       #end .outcome { margin-bottom: 9px; padding-block: 10px; }
       .final-share .sample { font-size: 15px; }
     }
+    .outcome-email-form { margin-top: 8px; }
+    .outcome-email-form label { display: block; color: var(--muted); font-size: 13px; margin-bottom: 5px; }
+    .outcome-email-form input { display: block; width: 100%; min-width: 0; height: 44px; padding: 9px 12px; border: 1px solid #cbb7aa; border-radius: 10px; background: var(--white); color: var(--ink); font: inherit; }
+    .outcome-email-form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .outcome-email-form button:disabled { cursor: default; }
+    .outcome-email-form .secondary { min-height: 44px; }
+    .outcome-email-form[aria-busy="true"] button { opacity: .7; }
+    .outcome #outcome-status { margin: 8px 0 0; font-size: 13px; line-height: 1.4; color: var(--muted); overflow-wrap: anywhere; }
+    .outcome #outcome-status[data-error="true"] { color: var(--accent-dark); }
     .outcome #outcome-status:empty { display: none; }
-    .outcome textarea { margin-top: 8px; resize: vertical; }
     body, .hero .kicker, .hero-copy > p:not(.kicker) { font-family: "Segoe UI", system-ui, sans-serif; }
     [data-active-screen="chat"] main.shell { padding-bottom: 0; }
     #chat.focused { display: flex; flex-direction: column; gap: 10px; height: calc(var(--chat-height, 100vh) - 80px); height: calc(min(var(--chat-height, 100dvh), 100dvh) - 80px); min-height: 274px; padding-block: 20px 12px; }
@@ -297,8 +305,11 @@
       #end .outcome-summary { grid-column: 1; grid-row: 2; min-width: 0; }
       #end #outcome-thought { margin: 0; }
       #end #outcome-note { grid-column: 1 / -1; grid-row: 3; margin: 0; }
-      #end #copy-outcome { grid-column: 1 / -1; grid-row: 4; margin-top: 6px; }
-      #end #outcome-status, #end #outcome-fallback { grid-column: 1 / -1; }
+      #end .outcome-email-form { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 24px; margin-top: 6px; }
+      #end .outcome-email-form label { grid-column: 1; }
+      #end #outcome-email { grid-column: 1; grid-row: 2; }
+      #end #email-outcome { grid-column: 2; grid-row: 2; margin-top: 0; }
+      #end #outcome-status { grid-column: 1 / -1; }
       #end .final-share { font-size: 14px; padding-block: 10px; }
     }
     @media (min-width: 1000px) {
@@ -466,9 +477,12 @@
         </div>
         <p id="outcome-next-step">Ты можешь сказать маме, когда сможешь приехать, и оставить себе время на отдых.</p>
         <p class="outcome-note" id="outcome-note"></p>
-        <button class="secondary" id="copy-outcome" type="button"><span id="copy-outcome-label">Скопировать итог</span><span class="copy-check" aria-hidden="true" hidden>✓</span></button>
-        <p id="outcome-status" role="status"></p>
-        <textarea id="outcome-fallback" rows="5" aria-label="Итог для копирования" readonly hidden></textarea>
+        <form class="outcome-email-form" id="outcome-email-form">
+          <label for="outcome-email">Твоя почта</label>
+          <input id="outcome-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.ru" aria-describedby="outcome-note outcome-status" required>
+          <button class="secondary" id="email-outcome" type="submit"><span id="email-outcome-label">Получить итог на почту</span><span class="copy-check" aria-hidden="true" hidden>✓</span></button>
+          <p id="outcome-status" role="status" aria-live="polite"></p>
+        </form>
       </section>
       <div class="quiet-note final-share">
         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true"><path d="M20.8 8.8c0 4.3-8.8 9-8.8 9s-8.8-4.7-8.8-9a4.4 4.4 0 0 1 8.8-.5 4.4 4.4 0 0 1 8.8.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
@@ -637,6 +651,7 @@
       acceptedIntention = '';
       conversationStartedAt = new Date().toISOString();
       exportSummary = ''; exportNextStep = '';
+      resetOutcomeEmail();
     }
 
     function message(text = '', error = false) {
@@ -859,14 +874,29 @@
       } else scrollToLatest();
     }
 
-    const copyOutcomeLabel = byId('copy-outcome-label');
-    const copyOutcomeCheck = byId('copy-outcome').querySelector('.copy-check');
-    let copyOutcomeTimer;
-
-    function clearCopy(statusId, fallbackId) {
-      byId(statusId).textContent = '';
-      byId(fallbackId).hidden = true;
-      byId(fallbackId).value = '';
+    const outcomeEmailForm = byId('outcome-email-form');
+    const outcomeEmailInput = byId('outcome-email');
+    const outcomeEmailButton = byId('email-outcome');
+    const outcomeEmailLabel = byId('email-outcome-label');
+    const outcomeEmailCheck = outcomeEmailButton.querySelector('.copy-check');
+    let outcomeEmailBusy = false, outcomeEmailRetry = null, outcomeEmailSent = '', outcomeEmailDeliveryStatus = '', outcomeEmailVersion = 0, outcomeEmailAbort = null;
+    function renderOutcomeEmail() {
+      const sent = Boolean(outcomeEmailSent && outcomeEmailSent === outcomeEmailInput.value.trim());
+      outcomeEmailInput.disabled = outcomeEmailBusy;
+      outcomeEmailButton.disabled = outcomeEmailBusy || sent;
+      outcomeEmailForm.setAttribute('aria-busy', String(outcomeEmailBusy));
+      outcomeEmailLabel.textContent = outcomeEmailBusy ? 'Отправляем…' : sent
+        ? outcomeEmailDeliveryStatus === 'confirmation_sent' ? 'Письмо отправлено' : 'Итог отправлен'
+        : 'Получить итог на почту';
+      outcomeEmailCheck.hidden = !sent;
+    }
+    function resetOutcomeEmail() {
+      outcomeEmailVersion++;
+      outcomeEmailAbort?.abort(); outcomeEmailAbort = null;
+      outcomeEmailBusy = false; outcomeEmailRetry = null; outcomeEmailSent = ''; outcomeEmailDeliveryStatus = '';
+      outcomeEmailInput.value = ''; outcomeEmailInput.setCustomValidity('');
+      byId('outcome-status').textContent = ''; byId('outcome-status').dataset.error = 'false';
+      renderOutcomeEmail();
     }
 
     function endingAfterIntention() {
@@ -886,13 +916,10 @@
         ? endingAfterIntention()
         : 'Можно побыть наедине с собой.';
       byId('outcome-thought').textContent = thought;
-      byId('outcome-note').textContent = prayed ? 'Твои мысли и Намерение. Скопируй и вставь в заметки.'
-        : 'Твои мысли. Скопируй и вставь в заметки.';
+      byId('outcome-note').textContent = prayed ? 'В письме — твои мысли и Намерение.'
+        : 'В письме — твои мысли.';
       showShareOptions(false);
-      clearCopy('outcome-status', 'outcome-fallback');
-      clearTimeout(copyOutcomeTimer);
-      copyOutcomeLabel.textContent = 'Скопировать итог';
-      copyOutcomeCheck.hidden = true;
+      renderOutcomeEmail();
       show('end', focus);
     }
 
@@ -996,49 +1023,64 @@
     }
 
     const practiceLink = 'https://mirone.ru/';
-    async function copyText(value, statusId, fallbackId, success) {
-      const notice = byId(statusId);
-      const fallback = byId(fallbackId);
-      try {
-        await navigator.clipboard.writeText(value);
-        fallback.hidden = true;
-        notice.textContent = success;
-        return true;
-      } catch {
-        fallback.value = value;
-        fallback.hidden = false;
-        notice.textContent = 'Можешь скопировать текст из поля.';
-        fallback.focus();
-        fallback.select();
-        return false;
-      }
-    }
-
     byId('start').addEventListener('click', () => {
       if (liveMode) { startLive(); return; }
       reset();
       showStep(0);
       if (reviewEnabled) {answer.value=dialogue[0].example;resizeMessage();}
     });
-    byId('copy-outcome').addEventListener('click', async () => {
-      const nextStep = exportNextStep || 'Я могу сказать маме, когда смогу приехать, и оставить себе время на отдых.';
-      const date = new Intl.DateTimeFormat('ru-RU', { timeZone: 'Europe/Moscow', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(conversationStartedAt));
-      const value = [
-        'Мой итог беседы с Мироном, ' + date,
-        'Главное\n' + (exportSummary || thought) + '\nМой следующий шаг — ' + nextStep,
-        acceptedIntention ? 'Моё Намерение\n' + acceptedIntention : '',
-        'Сохрани у себя, чтобы перечитать в нужный момент. Возвращайся к Мирону с новой ситуацией или после этого разговора — чтобы разобраться в своих чувствах и понять следующий шаг.',
-        'Мирон — услышать себя и почувствовать поддержку\nhttps://mirone.ru/'
-      ].filter(Boolean).join('\n\n');
-      const copied = await copyText(value, 'outcome-status', 'outcome-fallback', 'Итог скопирован.');
-      clearTimeout(copyOutcomeTimer);
-      byId('outcome-status').classList.toggle('visually-hidden', copied);
-      copyOutcomeCheck.hidden = !copied;
-      copyOutcomeLabel.textContent = copied ? 'Скопировано' : 'Скопировать итог';
-      if (copied) {
-        copyOutcomeTimer = setTimeout(() => {
-          copyOutcomeLabel.textContent = 'Скопировать итог';
-        }, 2000);
+    outcomeEmailInput.addEventListener('input', () => {
+      outcomeEmailInput.setCustomValidity('');
+      if (outcomeEmailRetry?.email !== outcomeEmailInput.value.trim()) outcomeEmailRetry = null;
+      byId('outcome-status').textContent = ''; byId('outcome-status').dataset.error = 'false';
+      renderOutcomeEmail();
+    });
+    outcomeEmailForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const email = outcomeEmailInput.value.trim();
+      if (outcomeEmailBusy || email === outcomeEmailSent) return;
+      const notice = byId('outcome-status');
+      notice.textContent = ''; notice.dataset.error = 'false';
+      if (!/^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/.test(email)) {
+        outcomeEmailInput.setCustomValidity('Проверь адрес почты.'); outcomeEmailInput.reportValidity(); return;
+      }
+      if (!outcomeEmailForm.reportValidity()) return;
+      if (!liveMode || !liveSession) {
+        notice.textContent = liveMode ? 'Для отправки итога начни и заверши беседу с Мироном.' : 'В макете письма не отправляются. Получить итог можно после живой беседы.';
+        return;
+      }
+      if (!outcomeEmailRetry || outcomeEmailRetry.email !== email) outcomeEmailRetry = { email, requestId: crypto.randomUUID() };
+      const payload = { sessionId: liveSession, ...outcomeEmailRetry };
+      const version = outcomeEmailVersion;
+      const controller = new AbortController(); outcomeEmailAbort = controller;
+      const timer = setTimeout(() => controller.abort(), 60000);
+      outcomeEmailBusy = true; renderOutcomeEmail();
+      try {
+        const response = await fetch(publicLive ? 'https://api.mirone.ru/api/outcome' : '/api/outcome', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+          signal: controller.signal, cache: 'no-store'
+        });
+        const result = await response.json();
+        if (version !== outcomeEmailVersion) return;
+        if (!response.ok || result.ok !== true || !['confirmation_sent', 'sent'].includes(result.status)) {
+          const error = new Error('OUTCOME_NOT_SENT'); error.status = response.status; throw error;
+        }
+        outcomeEmailSent = email;
+        outcomeEmailDeliveryStatus = result.status;
+        notice.textContent = result.status === 'confirmation_sent'
+          ? 'На ' + email + ' отправлена ссылка. Перейди по ней, чтобы получить итог.'
+          : 'Проверь почту: ' + email + '.';
+      } catch (error) {
+        if (version !== outcomeEmailVersion) return;
+        notice.dataset.error = 'true';
+        notice.textContent = error.status === 400 ? 'Проверь адрес почты и попробуй ещё раз.'
+          : error.status === 410 ? 'Срок беседы истёк. Начни новую практику, чтобы получить итог.'
+          : error.status === 409 ? 'Отправить итог можно после завершения практики.'
+          : error.status === 429 ? 'Подожди немного и попробуй отправить ещё раз.'
+          : 'Не удалось отправить письмо. Адрес сохранён — попробуй ещё раз.';
+      } finally {
+        clearTimeout(timer);
+        if (version === outcomeEmailVersion) { outcomeEmailBusy = false; outcomeEmailAbort = null; renderOutcomeEmail(); }
       }
     });
     const shareButton = byId('share-practice');
@@ -1174,6 +1216,46 @@
     const apiEndpoint = publicLive ? 'https://api.mirone.ru/api/chat' : '/api/chat';
     let liveSession = null, liveCount = 0, liveRetry = null;
     let liveStage = 'name', liveStarting = false;
+    const liveStorageKey = 'miron.live.session:' + new URL(apiEndpoint, location.href).href;
+    const liveTabKey = liveStorageKey + ':tab';
+    function savedLiveSession() {
+      try {
+        const value = sessionStorage.getItem(liveTabKey) || localStorage.getItem(liveStorageKey);
+        return typeof value === 'string' && /^[\w-]{8,80}$/.test(value) ? value : null;
+      } catch { return null; }
+    }
+    function rememberLiveSession(id) {
+      if (!liveMode || typeof id !== 'string' || !/^[\w-]{8,80}$/.test(id)) return;
+      try { localStorage.setItem(liveStorageKey, id); } catch { /* Storage can be disabled. */ }
+      try { sessionStorage.setItem(liveTabKey, id); } catch { /* Current tab still works. */ }
+    }
+    function draftKey(id) { return liveStorageKey + ':draft:' + id; }
+    function savedLiveDraft(id) {
+      try {
+        const value = JSON.parse(sessionStorage.getItem(draftKey(id)) || 'null');
+        if (!value || typeof value.text !== 'string') return { text: '' };
+        return { text: value.text.slice(0, 5000),
+          requestId: typeof value.requestId === 'string' && /^[\w-]{8,80}$/.test(value.requestId) ? value.requestId : null };
+      } catch { return { text: '' }; }
+    }
+    function rememberLiveDraft(text = answer.value) {
+      if (!liveMode || !liveSession) return;
+      const retryId = liveRetry?.text === text.trim() ? liveRetry.requestId : null;
+      try {
+        if (!text && !retryId) sessionStorage.removeItem(draftKey(liveSession));
+        else sessionStorage.setItem(draftKey(liveSession), JSON.stringify({ text, requestId: retryId }));
+      } catch { /* Do not prevent sending when browser storage is unavailable. */ }
+    }
+    function forgetLiveSession(id = liveSession || savedLiveSession()) {
+      try {
+        if (!id || localStorage.getItem(liveStorageKey) === id) localStorage.removeItem(liveStorageKey);
+      } catch { /* Storage can be disabled. */ }
+      try {
+        sessionStorage.removeItem(liveTabKey);
+        if (id) sessionStorage.removeItem(draftKey(id));
+      } catch { /* Storage can be disabled. */ }
+    }
+
     function liveReviewExample() {
       const stages = ['name','q1','q2','q3','q4','q5','mirror','draft','speak'];
       const index = stages.indexOf(liveStage);
@@ -1217,19 +1299,20 @@
       bubble.append(quote);
       appendParagraphs(text.slice(offset + intentionText.length).trim());
     }
-    async function apiChat(data) {
+    async function apiChat(data, timeout = 115000) {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 115000);
+      const timer = setTimeout(() => controller.abort(), timeout);
       try {
         const res = await fetch(apiEndpoint, { method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify(data), signal:controller.signal, cache:'no-store' });
         const result = await res.json();
-        if (!res.ok) throw new Error(result.error || 'REQUEST_FAILED');
+        if (!res.ok) { const error = new Error(result.error || 'REQUEST_FAILED'); error.status = res.status; throw error; }
         return result;
       } finally { clearTimeout(timer); }
     }
     function renderLive(data) {
       liveSession = data.sessionId;
+      rememberLiveSession(liveSession);
       liveStage = data.stage;
       if (data.startedAt) conversationStartedAt = data.startedAt;
       name = data.name || ''; const newRows = [];
@@ -1266,14 +1349,42 @@
       if (controls) controls.hidden = !reviewEnabled;
       updateLiveReviewControls();
     }
+    async function resumeSnapshot(sessionId) {
+      const data = await apiChat({ action: 'resume', sessionId }, 20000);
+      if (data.sessionId !== sessionId || !Array.isArray(data.messages)) throw new Error('INVALID_RESUME');
+      stream.replaceChildren(); liveCount = 0; renderLive(data);
+      return data;
+    }
+    async function resumeLive(sessionId) {
+      if (liveStarting || pending) return;
+      const draft = savedLiveDraft(sessionId);
+      liveSession = sessionId;
+      liveRetry = draft.requestId ? { text: draft.text.trim(), requestId: draft.requestId } : null;
+      liveStarting = true;
+      const button = byId('start'); button.disabled = true;
+      form.classList.add('message-form'); send.dataset.label = 'Отправить';
+      byId('chat-title').textContent = 'Беседа';
+      answer.value = draft.text; show('chat', false); setPending(true); message();
+      try {
+        await resumeSnapshot(sessionId);
+        answer.value = draft.text; message();
+      } catch {
+        answer.value = draft.text;
+        message('Не удалось восстановить беседу. Сохранённый ответ не отправлен. Попробуй обновить страницу ещё раз. Новая беседа сама не начнётся.', true);
+      } finally {
+        liveStarting = false; button.disabled = false; setPending(false); resizeMessage();
+      }
+    }
     async function startLive() {
       if (liveStarting || pending) return;
+      const previousSession = liveSession || savedLiveSession();
       liveStarting = true;
       updateLiveReviewControls();
       const button = byId('start'); button.disabled = true;
       try {
         const data = await apiChat({action:'start'});
-        reset();liveCount=0;liveRetry=null;renderLive(data);setPending(false);answer.value=reviewEnabled?liveReviewExample():'';resizeMessage();
+        forgetLiveSession(previousSession);
+        reset();liveCount=0;liveRetry=null;renderLive(data);setPending(false);answer.value=reviewEnabled?liveReviewExample():'';rememberLiveDraft();resizeMessage();
       } catch {
         button.textContent = 'Не удалось подключиться. Попробовать ещё раз';
       } finally {button.disabled=false;liveStarting=false;updateLiveReviewControls();}
@@ -1284,21 +1395,35 @@
       if(text.length>answer.maxLength) {message('Ответ слишком длинный. Можно отправить до '+answer.maxLength+' символов.',true);return;}
       if(!liveRetry || liveRetry.text!==text) liveRetry={text,requestId:crypto.randomUUID()};
       const payload={sessionId:liveSession,...liveRetry};
+      answer.value = value; rememberLiveDraft();
       setPending(true);message();
       try {
-        const data=await apiChat(payload);
-        renderLive(data);answer.value=reviewEnabled?liveReviewExample():'';liveRetry=null;message();
+        let data;
+        try { data=await apiChat(payload); }
+        catch (error) {
+          if (error.status !== 410 && error.message !== 'SESSION_EXPIRED') throw error;
+          // Recover the same server conversation and replay the same idempotent request once.
+          try { await resumeSnapshot(payload.sessionId); }
+          catch { const failed = new Error('RESUME_FAILED'); failed.code = 'RESUME_FAILED'; throw failed; }
+          data=await apiChat(payload);
+        }
+        renderLive(data);answer.value=reviewEnabled?liveReviewExample():'';liveRetry=null;rememberLiveDraft();message();
       } catch(error) {
-        message(error.message==='SESSION_EXPIRED'?'Беседа завершилась по времени. Обнови страницу, чтобы начать заново.':'Ответ не получен. Твой текст сохранён — можно отправить ещё раз.',true);
+        answer.value = value; rememberLiveDraft();
+        message(error.code==='RESUME_FAILED' || error.status===410 || error.message==='SESSION_EXPIRED'
+          ? 'Не удалось восстановить беседу. Сохранённый ответ не отправлен. Текст оставлен в поле — можно попробовать ещё раз. Новая беседа сама не начнётся.'
+          : 'Ответ не получен. Твой текст сохранён — можно отправить ещё раз.',true);
       } finally {setPending(false);resizeMessage();}
     }
+    answer.addEventListener('input', () => rememberLiveDraft());
 
-    // Reload at home so an in-flight reply cannot reopen the previous conversation.
+    // An explicit return home chooses a fresh conversation, unlike a browser reload.
     const homeURL = new URL(window.location.href);
     homeURL.searchParams.delete('screen');
     homeURL.searchParams.delete('qaStart');
     homeURL.hash = '';
     byId('brand-home').href = homeURL.href;
+    byId('brand-home').addEventListener('click', () => { if (liveMode) forgetLiveSession(); });
 
     const preview = new URLSearchParams(window.location.search);
     const avatar = preview.get('avatar');
@@ -1306,6 +1431,10 @@
     openPreview(preview.get('screen'), false);
     byId('review-arrows').hidden = !reviewEnabled;
     if (liveMode && preview.get('qaStart') === '1') startLive();
+    else if (liveMode && !preview.has('screen')) {
+      const sessionId = savedLiveSession();
+      if (sessionId) resumeLive(sessionId);
+    }
   </script>
 </body>
 </html>
