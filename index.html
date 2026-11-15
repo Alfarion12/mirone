@@ -431,6 +431,7 @@
           <p>Я знаю, что Бог всегда рядом и слышит нас, когда мы обращаемся к нему искренне, и помогает, когда это уместно. Просить можно и о малом, и о большом. При этом конкретные ощущения, способ помощи, результат или срок не гарантированы. У каждого — свой индивидуальный опыт.</p>
           <p>В конце ты сможешь сохранить то, что понял о себе, вместе со своим Намерением. К этим словам можно вернуться, когда снова понадобится опора. Как поступить дальше, решаешь ты.</p>
           <p>Ты можешь приходить с новой ситуацией или вернуться к той же — чтобы понять, что теперь чувствуешь, заметить привычную реакцию и найти свой следующий шаг.</p>
+          <p><a class="contact-link question-link" href="#contact" aria-haspopup="dialog">Задать вопрос</a></p>
           </div>
         </details>
         <details name="menu-topic" data-topic="privacy" hidden>
@@ -625,7 +626,7 @@
       if (contactDialog.open) return;
       document.body.classList.remove('contact-open');
       if(contactOpener?.id==='footer-bookmark')contactOpener.focus({preventScroll:true});
-      else if(desktopMenu.matches)headerMenu.querySelector('.contact-link:not(.feedback-link)').closest('details').querySelector('summary').focus({preventScroll:true});
+      else if(desktopMenu.matches && contactOpener?.closest('details'))contactOpener.closest('details').querySelector('summary').focus({preventScroll:true});
       else menuToggle.focus({preventScroll:true});
     });
     let contactBusy = false, contactRequestId = null;
