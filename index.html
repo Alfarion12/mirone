@@ -1127,12 +1127,9 @@
           reviewAnswers.set(step, text);
           showStep(step + 1, text);
         } else {
-          proposedThought = text;
           awaitingCorrection = false;
           beginReply(text);
-          addText('p', 'Вот твоя поправка.');
-          addText('blockquote', proposedThought);
-          addText('p', 'Так верно? Напиши «да» или уточни своими словами.', true);
+          addText('p', 'В режиме «Макет» используется готовый текст. Для проверки своих поправок выбери «Живой ИИ» на первом экране. Здесь можно продолжить с предложенным вариантом: напиши «да».');
           scrollToLatest();
         }
       } else if (item.kind === 'draft') {
@@ -1145,10 +1142,15 @@
           beginReply(text);
           addText('p', 'Что поменять в Намерении? Пришли свой вариант.', true);
           scrollToLatest();
-        } else {
-          acceptedIntention = kind === 'yes' ? (acceptedIntention || intentionDraft) : text;
+        } else if (kind === 'yes') {
+          acceptedIntention = acceptedIntention || intentionDraft;
           reviewAnswers.set(step, text);
           showStep(step + 1, text);
+        } else {
+          awaitingCorrection = false;
+          beginReply(text);
+          addText('p', 'В режиме «Макет» используется готовое Намерение. Для проверки своих поправок выбери «Живой ИИ» на первом экране. Здесь можно продолжить с предложенным вариантом: напиши «да».');
+          scrollToLatest();
         }
       } else {
         reviewAnswers.set(step, text);
