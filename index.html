@@ -244,13 +244,15 @@
     #chat .send-icon:disabled { font-size: 12px; }
     .review-arrows[hidden] {display:none;}
     #home .quiet-note > svg {touch-action:manipulation;user-select:none;}
-    .review-arrows { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; border-top: 1px solid var(--line); margin-top: 8px; padding-top: 3px; }
-    #home .review-arrows { margin-top: 16px; }
-    .ending .review-arrows { position: sticky; bottom: 0; margin-top: 0; background: var(--paper); }
-    #review-next { grid-column: 3; }
-    .review-arrows button { min-height: 40px; border: 0; background: transparent; color: var(--accent-dark); }
-    .review-arrows .review-arrow { font-size: 22px; }
-    .review-arrows button:disabled { opacity: .32; cursor: default; }
+    .review-arrows { display:flex;align-items:center;margin-top:16px;padding:0;border:0;background:var(--paper); }
+    .ending .review-arrows { position:sticky;bottom:0;margin-top:0;background:var(--paper); }
+    .review-mode { display:flex;align-items:center;justify-content:center;flex:1;min-width:0;gap:3px; }
+    .review-mode.is-inactive .review-mode-name { opacity:.25; }
+    .review-mode-name { font-size:14px;font-weight:500;color:var(--accent-dark);white-space:nowrap; }
+    .review-divider { width:1px;height:22px;background:#dfcec2;margin:0 14px;flex:none; }
+    .review-arrows .review-arrow { min-height:44px;width:32px;flex:none;padding:0;border:0;background:transparent;color:var(--accent-dark);font:24px/1 system-ui,sans-serif; }
+    .review-arrows button:disabled { opacity:.25;cursor:default; }
+    .review-arrows button:focus-visible { outline:2px solid var(--accent);outline-offset:1px;border-radius:6px; }
 
     @media (max-width: 640px) {
       #chat.focused { height: calc(var(--chat-height, 100vh) - 57px); height: calc(min(var(--chat-height, 100dvh), 100dvh) - 57px); padding-top: 17px; }
@@ -463,8 +465,9 @@
         <p id="answer-limit" class="answer-status" role="status" hidden></p>
         <p id="answer-status" class="answer-status" role="status" hidden></p>
         <div class="review-arrows" id="review-arrows" aria-label="Переключение экранов для проверки" hidden>
-          <button class="review-arrow" id="review-prev" type="button" aria-label="Предыдущий экран">←</button>
-          <button class="review-arrow" id="review-next" type="button" aria-label="Следующий экран">→</button>
+          <div class="review-mode"><button class="review-arrow" id="review-mock-prev" type="button" aria-label="Предыдущий экран макета">←</button><span class="review-mode-name">Макет</span><button class="review-arrow" id="review-mock-next" type="button" aria-label="Следующий экран макета">→</button></div>
+          <span class="review-divider" aria-hidden="true"></span>
+          <div class="review-mode"><button class="review-arrow" id="review-prev" type="button" aria-label="Предыдущий шаг живой беседы">←</button><span class="review-mode-name">Живой ИИ</span><button class="review-arrow" id="review-next" type="button" aria-label="Следующий шаг живой беседы">→</button></div>
         </div>
       </div>
     </section>
@@ -618,6 +621,10 @@
     const stream = byId('chat-stream');
     const reviewBar = byId('review-arrows');
     let reviewEnabled = false;
+    const requestedReviewMode = new URLSearchParams(location.search).get('review');
+    if (requestedReviewMode === 'mock' || requestedReviewMode === 'live') reviewEnabled = true;
+    const reviewMockPrev = byId('review-mock-prev');
+    const reviewMockNext = byId('review-mock-next');
     const reviewPrev = byId('review-prev');
     const reviewNext = byId('review-next');
     const reviewAnswers = new Map();
@@ -737,8 +744,8 @@
       document.body.dataset.activeScreen = screen;
       byId(screen === 'chat' ? 'composer' : screen).append(reviewBar);
       reviewBar.hidden = !reviewEnabled;
-      reviewPrev.hidden = screen === 'home';
-      reviewNext.hidden = screen === 'end';
+      reviewPrev.hidden = false;
+      reviewNext.hidden = false;
       updateLiveReviewControls();
       for (const id of screens) byId(id).hidden = id !== screen;
       window.scrollTo(0, 0);
@@ -1178,24 +1185,34 @@
         heartClicks=0;heartFirstClick=0;
         reviewEnabled=!reviewEnabled;
         reviewBar.hidden=!reviewEnabled;
-        reviewPrev.hidden=true;reviewNext.hidden=false;
+        reviewPrev.hidden=false;reviewNext.hidden=false;
         updateLiveReviewControls();
       }
     });
 
-    reviewPrev.addEventListener('click', () => {
-      if (!liveMode) moveReview(-1);
+    function switchReview(mode) {
+      if (pending || liveStarting || document.body.dataset.activeScreen !== 'home') return;
+      const target = new URL(location.href);
+      target.searchParams.set('review', mode);
+      target.searchParams.set('reviewStart', '1');
+      target.searchParams.delete('screen');target.searchParams.delete('qaStart');
+      target.hash='';location.assign(target.href);
+    }
+    reviewMockPrev.addEventListener('click', () => { if (!liveMode) moveReview(-1); });
+    reviewMockNext.addEventListener('click', () => {
+      if (liveMode) return switchReview('mock');
+      if (document.body.dataset.activeScreen === 'home') byId('start').click();
+      else moveReview(1);
     });
     reviewNext.addEventListener('click', () => {
+      if (!liveMode) return switchReview('live');
       if (document.body.dataset.activeScreen === 'home') byId('start').click();
-      else if (liveMode) {
+      else {
         if (pending || liveStarting || !liveSession) return;
         const value = answer.value.trim() ? answer.value : liveReviewExample();
         if (!value) return;
-        answer.value = value;
-        resizeMessage();
-        advanceLive(value);
-      } else moveReview(1);
+        answer.value = value;resizeMessage();advanceLive(value);
+      }
     });
 
     function openPreview(screen, focus = true) {
@@ -1217,7 +1234,7 @@
 
     // The public site uses the private VPS API; local editor previews still require ?live=1.
     const publicLive = location.hostname === 'mirone.ru';
-    const liveMode = publicLive || (['127.0.0.1','localhost'].includes(location.hostname) && new URLSearchParams(location.search).get('live') === '1');
+    const liveMode = requestedReviewMode !== 'mock' && (publicLive || (['127.0.0.1','localhost'].includes(location.hostname) && (new URLSearchParams(location.search).get('live') === '1' || requestedReviewMode === 'live')));
     const apiEndpoint = publicLive ? 'https://api.mirone.ru/api/chat' : '/api/chat';
     let liveSession = null, liveCount = 0, liveRetry = null;
     let liveStage = 'name', liveStarting = false;
@@ -1267,14 +1284,20 @@
       return index < 0 ? '' : dialogue[index].example || '';
     }
     function updateLiveReviewControls() {
-      if (!liveMode) return;
-      // A completed server turn cannot be rewound by changing the visual fixture.
-      reviewPrev.disabled = true;
-      reviewPrev.title = 'В живой беседе предыдущие ответы остаются выше в чате';
-      reviewNext.disabled = pending || liveStarting;
-      reviewNext.title = document.body.dataset.activeScreen === 'home'
-        ? 'Начать живую тестовую беседу' : 'Отправить подготовленный ответ в живой API';
+      const screen=document.body.dataset.activeScreen;
+      const busy=pending || liveStarting;
+      const locked=screen !== 'home';
+      reviewMockNext.closest('.review-mode').classList.toggle('is-inactive',locked && liveMode);
+      reviewNext.closest('.review-mode').classList.toggle('is-inactive',locked && !liveMode);
+      reviewMockPrev.disabled=liveMode || screen==='home' || busy;
+      reviewMockNext.disabled=busy || (locked && liveMode) || (!liveMode && screen==='end');
+      reviewMockNext.title=liveMode?'Начать новый тест на готовом макете':'Следующий экран макета без API';
+      reviewPrev.disabled=true;
+      reviewPrev.title='В живой беседе предыдущие ответы остаются выше в чате';
+      reviewNext.disabled=busy || (locked && !liveMode) || (liveMode && screen==='end');
+      reviewNext.title=!liveMode?'Начать новую живую тестовую беседу':screen==='home'?'Начать живую тестовую беседу':'Отправить подготовленный ответ в живой API';
     }
+
     function appendInline(element, text) {
       for (const part of text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_)/g)) {
         if (!part) continue;
@@ -1437,6 +1460,7 @@
     const homeURL = new URL(window.location.href);
     homeURL.searchParams.delete('screen');
     homeURL.searchParams.delete('qaStart');
+    homeURL.searchParams.delete('reviewStart');
     homeURL.hash = '';
     byId('brand-home').href = homeURL.href;
     byId('brand-home').addEventListener('click', () => { if (liveMode) forgetLiveSession(); });
@@ -1446,7 +1470,10 @@
     if (avatar === 'mono' || avatar === 'beige') byId('chat').dataset.avatar = avatar;
     openPreview(preview.get('screen'), false);
     byId('review-arrows').hidden = !reviewEnabled;
-    if (liveMode && preview.get('qaStart') === '1') startLive();
+    if (reviewEnabled && preview.get('reviewStart') === '1') {
+      const clean=new URL(location.href);clean.searchParams.delete('reviewStart');history.replaceState(null,'',clean.href);
+      byId('start').click();
+    } else if (liveMode && preview.get('qaStart') === '1') startLive();
     else if (liveMode && !preview.has('screen')) {
       const sessionId = savedLiveSession();
       if (sessionId) resumeLive(sessionId);
