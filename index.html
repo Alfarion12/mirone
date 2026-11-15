@@ -1311,6 +1311,16 @@
         return result;
       } finally { clearTimeout(timer); }
     }
+    const ownerReviewStorageKey='miron-owner-review:v1';
+    function ownerReviewToken(){try{return localStorage.getItem(ownerReviewStorageKey)||'';}catch{return '';}}
+    const ownerReviewReady=(async()=>{
+      const token=new URLSearchParams(location.hash.slice(1)).get('owner-review');
+      if(!token)return;
+      history.replaceState(null,'',location.pathname+location.search);
+      if(!/^[a-f0-9]{64}$/.test(token))return;
+      try{await apiChat({action:'authorize-review',reviewToken:token},20000);localStorage.setItem(ownerReviewStorageKey,token);}
+      catch{message('Не удалось активировать режим владельца. Открой закрытую ссылку ещё раз.',true);}
+    })();
     function renderLive(data) {
       liveSession = data.sessionId;
       rememberLiveSession(liveSession);
@@ -1383,7 +1393,8 @@
       updateLiveReviewControls();
       const button = byId('start'); button.disabled = true;
       try {
-        const data = await apiChat({action:'start'});
+        await ownerReviewReady;
+        const data = await apiChat({action:'start', ...(reviewEnabled ? {testMode:true,reviewToken:ownerReviewToken()} : {})});
         forgetLiveSession(previousSession);
         reset();liveCount=0;liveRetry=null;renderLive(data);setPending(false);answer.value=reviewEnabled?liveReviewExample():'';rememberLiveDraft();resizeMessage();
       } catch {
