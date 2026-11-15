@@ -1602,7 +1602,9 @@
         answer.value = value; rememberLiveDraft();
         message(error.code==='RESUME_FAILED' || error.status===410 || error.message==='SESSION_EXPIRED'
           ? 'Не удалось восстановить беседу. Сохранённый ответ не отправлен. Текст оставлен в поле — можно попробовать ещё раз. Новая беседа сама не начнётся.'
-          : 'Ответ не получен. Твой текст сохранён — можно отправить ещё раз.',true);
+          : ['MODEL_BUSY','RATE_LIMIT'].includes(error.message)
+            ? 'Нужна небольшая пауза. Беседа и твой текст сохранены — попробуй отправить ещё раз чуть позже.'
+            : 'Ответ не получен. Твой текст сохранён — можно отправить ещё раз.',true);
       } finally {setPending(false);resizeMessage();}
     }
     answer.addEventListener('input', () => rememberLiveDraft());
