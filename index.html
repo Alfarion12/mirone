@@ -83,6 +83,7 @@
     .secondary:hover { background: var(--peach); }
     .hero .primary { min-width: 218px; }
     .arrow { font-size: 20px; line-height: 1; font-weight: 400; }
+    #start .start-arrow { display: block; flex: none; transform: translateY(1px); }
     .timing { display: block; margin-top: 10px; color: var(--muted); font-size: 13px; }
     .quiet-note { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-radius: 12px; background: var(--cream); color: var(--muted); width: fit-content; max-width: 100%; font-size: 14px; }
     .quiet-note svg { flex: none; color: var(--accent); }
@@ -429,7 +430,7 @@
           <p class="kicker practice-kicker"><span class="practice-icon" aria-hidden="true"><img src="miron-prayer-6f832a17e807.webp" alt=""></span><span>Короткая практика с ИИ</span></p>
           <h1 id="home-title" tabindex="-1">Услышать себя<span>и почувствовать поддержку</span></h1>
           <p>В трудной ситуации бывает непросто понять, что чувствуешь. Мирон задаст несколько вопросов, чтобы помочь тебе услышать себя. Если захочешь, он поможет найти слова, чтобы обратиться к Высшим Силам и получить их поддержку.</p>
-          <button class="primary" type="button" id="start">Начать <span class="arrow" aria-hidden="true">→</span></button>
+          <button class="primary" type="button" id="start"><span>Начать</span><svg class="start-arrow" aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button>
           <span class="timing">Выдели 5–10 минут</span>
         </div>
       </div>
