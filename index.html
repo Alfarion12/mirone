@@ -174,11 +174,11 @@
     #outcome-thought.expanded { display: block; }
     .outcome-summary .sample { display: block; min-height: 32px; margin: 0; font-size: 13px; }
     .outcome .outcome-note { color: var(--accent-dark); font-size: 13px; line-height: 1.35; margin: 8px 0 0; }
-    .outcome .secondary { position: relative; width: 100%; margin-top: 9px; padding-inline: 38px; }
+    .outcome #email-outcome { position: relative; width: 100%; margin-top: 9px; padding-inline: 38px; }
     .copy-check { position: absolute; inset-inline-end: 14px; top: 50%; transform: translateY(-50%); color: #287648; font-size: 20px; }
     .final-share { display: grid; grid-template-columns: 19px minmax(0, 1fr) 19px; gap: 8px; width: 100%; text-align: center; }
     @media (hover: hover) {
-      #email-outcome:hover { background: #f0dcd1; border-color: var(--accent); }
+      #email-outcome:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
       .final-share .sample:hover { color: var(--accent); text-decoration-thickness: 2px; }
     }
     .final-share p { margin: 0; }
@@ -207,7 +207,9 @@
     .outcome-email-form input { display: block; width: 100%; min-width: 0; height: 44px; padding: 9px 12px; border: 1px solid #cbb7aa; border-radius: 10px; background: var(--white); color: var(--ink); font: inherit; }
     .outcome-email-form input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     .outcome-email-form button:disabled { cursor: default; }
-    .outcome-email-form .secondary { min-height: 44px; }
+    .outcome-email-form #email-outcome { min-height: 48px; }
+    #email-outcome .copy-check { color: #c7efba; }
+    #outcome-note strong { display: inline; font-weight: 650; }
     .outcome-email-form[aria-busy="true"] button { opacity: .7; }
     .outcome #outcome-status { margin: 8px 0 0; font-size: 13px; line-height: 1.4; color: var(--muted); overflow-wrap: anywhere; }
     .outcome #outcome-status[data-error="true"] { color: var(--accent-dark); }
@@ -303,7 +305,7 @@
       #next-step-title { grid-column: 1 / -1; grid-row: 1; }
       #end #outcome-next-step { grid-column: 2; grid-row: 2; margin: 0; }
       #end #outcome-title { grid-column: 2; grid-row: 1; }
-      #end .outcome-summary { grid-column: 1; grid-row: 2; min-width: 0; }
+      #end .outcome-summary { grid-column: 1 / -1; grid-row: 2; min-width: 0; }
       #end #outcome-thought { margin: 0; }
       #end #outcome-note { grid-column: 1 / -1; grid-row: 3; margin: 0; }
       #end .outcome-email-form { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 24px; margin-top: 6px; }
@@ -472,16 +474,16 @@
       <h1 id="end-title" tabindex="-1">Дорогая Марина,</h1>
       <p class="ending-text"><strong id="ending-achievement"></strong> <span id="ending-reflection"></span></p>
       <section class="step-card outcome" aria-labelledby="next-step-title">
-        <h2 id="next-step-title">Что взять с собой</h2>
+        <h2 id="next-step-title">Теперь сохрани своё открытие</h2>
         <div class="outcome-summary">
           <p id="outcome-thought"></p>
         </div>
-        <p id="outcome-next-step">Ты можешь сказать маме, когда сможешь приехать, и оставить себе время на отдых.</p>
+        <p id="outcome-next-step" hidden>Ты можешь сказать маме, когда сможешь приехать, и оставить себе время на отдых.</p>
         <p class="outcome-note" id="outcome-note"></p>
         <form class="outcome-email-form" id="outcome-email-form">
           <label for="outcome-email">Твоя почта</label>
           <input id="outcome-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="name@example.ru" aria-describedby="outcome-note outcome-status" required>
-          <button class="secondary" id="email-outcome" type="submit"><span id="email-outcome-label">Получить итог на почту</span><span class="copy-check" aria-hidden="true" hidden>✓</span></button>
+          <button class="primary" id="email-outcome" type="submit"><span id="email-outcome-label">Сохранить итог на почту</span><span class="copy-check" aria-hidden="true" hidden>✓</span></button>
           <p id="outcome-status" role="status" aria-live="polite"></p>
         </form>
       </section>
@@ -490,7 +492,7 @@
         <div>
           <p>Кому из близких это может помочь?</p>
           <button class="sample" id="share-practice" type="button" aria-controls="share-options" aria-expanded="false">Отправить ссылку на практику <span aria-hidden="true">↗</span></button>
-          <div class="share-options" id="share-options" role="group" aria-label="Куда отправить ссылку" hidden><a id="share-telegram" target="_blank" rel="noopener noreferrer"><span class="share-choice-icon" style="color:#3b9dcd"><svg aria-hidden="true" viewBox="0 0 24 24" width="25" height="25"><path d="m5 11 14-6-3 14-5-5-3 3v-5l8-5-10 6Z" fill="currentColor"/></svg></span><span>Telegram</span></a><a id="share-max" target="_blank" rel="noopener noreferrer"><span class="share-choice-icon" style="color:#7768bd"><img src="share-max.svg" width="27" height="27" alt="" aria-hidden="true"></span><span>MAX</span></a><a id="share-whatsapp" target="_blank" rel="noopener noreferrer"><span class="share-choice-icon" style="color:#46a778"><img src="share-whatsapp.svg" width="27" height="27" alt="" aria-hidden="true"></span><span>WhatsApp</span></a><button id="share-more" type="button"><span class="share-choice-icon" style="color:#94634e"><svg aria-hidden="true" viewBox="0 0 24 24" width="25" height="25"><circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/></svg></span><span>Ещё…</span></button><div class="share-fallback" id="share-fallback" hidden><button id="share-copy" type="button">Скопировать ссылку</button><a id="share-email">Почта</a><span id="share-copy-status" role="status"></span></div></div>
+          <div class="share-options" id="share-options" role="group" aria-label="Куда отправить ссылку" hidden><a id="share-telegram" target="_blank" rel="noopener noreferrer"><span class="share-choice-icon" style="color:#3b9dcd"><img src="share-telegram.png" width="27" height="27" alt="" aria-hidden="true"></span><span>Telegram</span></a><a id="share-max" target="_blank" rel="noopener noreferrer"><span class="share-choice-icon" style="color:#7768bd"><img src="share-max.svg" width="27" height="27" alt="" aria-hidden="true"></span><span>MAX</span></a><a id="share-whatsapp" target="_blank" rel="noopener noreferrer"><span class="share-choice-icon" style="color:#46a778"><img src="share-whatsapp.svg" width="27" height="27" alt="" aria-hidden="true"></span><span>WhatsApp</span></a><button id="share-more" type="button"><span class="share-choice-icon" style="color:#94634e"><svg aria-hidden="true" viewBox="0 0 24 24" width="25" height="25"><circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/></svg></span><span>Ещё…</span></button><div class="share-fallback" id="share-fallback" hidden><button id="share-copy" type="button">Скопировать ссылку</button><a id="share-email">Почта</a><span id="share-copy-status" role="status"></span></div></div>
         </div>
       </div>
     </section>
@@ -888,7 +890,7 @@
       outcomeEmailForm.setAttribute('aria-busy', String(outcomeEmailBusy));
       outcomeEmailLabel.textContent = outcomeEmailBusy ? 'Отправляем…' : sent
         ? outcomeEmailDeliveryStatus === 'confirmation_sent' ? 'Письмо отправлено' : 'Итог отправлен'
-        : 'Получить итог на почту';
+        : 'Сохранить итог на почту';
       outcomeEmailCheck.hidden = !sent;
     }
     function resetOutcomeEmail() {
@@ -917,8 +919,10 @@
         ? endingAfterIntention()
         : 'Можно побыть наедине с собой.';
       byId('outcome-thought').textContent = thought;
-      byId('outcome-note').textContent = prayed ? 'В письме — твои мысли и Намерение.'
-        : 'В письме — твои мысли.';
+      byId('outcome-note').replaceChildren(document.createTextNode('В письме — '));
+      const contents = document.createElement('strong');
+      contents.textContent = prayed ? 'твой следующий шаг и Намерение' : 'твой следующий шаг';
+      byId('outcome-note').append(contents, document.createTextNode(prayed ? ', чтобы вернуться к ним в нужный момент.' : ', чтобы вернуться к нему в нужный момент.'));
       showShareOptions(false);
       renderOutcomeEmail();
       show('end', focus);
