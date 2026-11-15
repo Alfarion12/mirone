@@ -404,10 +404,12 @@
 <style>
     .after-practice-toggle { border:0; padding:0; background:transparent; color:var(--accent-dark); font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
     .after-practice-open .how-overview { display:none; }
-    #after-practice-content { border-top:1px solid var(--line); padding-top:4px; }
+    #after-practice-content { padding:0; }
+    #after-practice-title { margin:0 0 14px; font-size:17px; line-height:1.4; }
+    #how-it-works .how-menu-link { margin:24px 0 0; }
     #after-practice-content h3 { margin:14px 0 8px; font-size:15px; line-height:1.4; color:var(--ink); }
     @media (min-width:1000px) {
-      #how-it-works.after-practice-open > .menu-content { width:min(620px, calc(100vw - 48px)); max-height:min(680px, calc(100dvh - 100px)); }
+      #how-it-works > .menu-content { width:min(620px, calc(100vw - 48px)); max-height:min(680px, calc(100dvh - 100px)); }
     }
 </style>
 </head>
@@ -440,8 +442,8 @@
           <p>Я знаю, что Бог всегда рядом и слышит нас, когда мы обращаемся к нему искренне, и помогает, когда это уместно. Просить можно и о малом, и о большом. При этом конкретные ощущения, способ помощи, результат или срок не гарантированы. У каждого — свой индивидуальный опыт.</p>
           <p>В конце ты сможешь сохранить то, что понял о себе, вместе со своим Намерением. К этим словам можно вернуться, когда снова понадобится опора. Как поступить дальше, решаешь ты.</p>
           <p>Ты можешь приходить с новой ситуацией или вернуться к той же — чтобы понять, что теперь чувствуешь, заметить привычную реакцию и найти свой следующий шаг.</p>
-          </div><p><button type="button" class="after-practice-toggle" id="after-practice-toggle" aria-expanded="false" aria-controls="after-practice-content">После практики</button></p>
-          <section id="after-practice-content" aria-label="После практики" hidden><h3>Что делать сразу после Намерения?</h3>
+          </div><p class="how-menu-link" id="after-practice-entry"><button type="button" class="after-practice-toggle" id="after-practice-toggle" aria-expanded="false" aria-controls="after-practice-content">После практики</button></p>
+          <section id="after-practice-content" aria-labelledby="after-practice-title" hidden><h2 id="after-practice-title" tabindex="-1">После практики</h2><h3>Что делать сразу после Намерения?</h3>
 <p>Можно вернуться к обычным делам и дать себе спокойно жить дальше. Не нужно специально торопить события или постоянно проверять, появился ли результат.</p>
 <p>Выразив Намерение, ты попросил о поддержке и дал себе шанс её получить. Теперь постарайся отпустить напряжённое ожидание. Помни, что никто тебе ничего не должен. Обращайся с доверием и благодарностью, оставляя форму и время помощи за Высшими Силами.</p>
 <h3>А собственные действия нужны?</h3>
@@ -457,7 +459,8 @@
 <p>Когда появилась новая ситуация, хочется разобраться в своих чувствах, услышать себя или найти опору. Можно вернуться и к знакомой ситуации, чтобы увидеть, что изменилось и какой шаг теперь тебе подходит.</p>
 <p>Возвращение — по твоему желанию. Здесь можно получить поддержку и продолжить собственный путь.</p>
 </section>
-          <p><a class="contact-link question-link" href="#contact" aria-haspopup="dialog">Задать вопрос</a></p>
+          <p class="how-menu-link" id="after-practice-back-row" hidden><button type="button" class="after-practice-toggle" id="after-practice-back">← Как это работает</button></p>
+          <p class="how-menu-link"><a class="contact-link question-link" href="#contact" aria-haspopup="dialog">Задать вопрос</a></p>
           </div>
         </details>
         <details name="menu-topic" data-topic="privacy" hidden>
@@ -637,16 +640,24 @@
       afterPracticeContent.hidden = !open;
       afterPracticeToggle.setAttribute('aria-expanded', String(open));
       howItWorks.classList.toggle('after-practice-open', open);
+      byId('after-practice-entry').hidden = open;
+      byId('after-practice-back-row').hidden = !open;
       if (open) {
         headerMenu.open = true;
         howItWorks.open = true;
         requestAnimationFrame(() => {
           const scroller = desktopMenu.matches ? howItWorks.querySelector('.menu-content') : headerMenu.querySelector('.menu-panel');
-          scroller.scrollTop += afterPracticeToggle.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 18;
-          if (focus) afterPracticeToggle.focus({preventScroll:true});
+          scroller.scrollTop = 0;
+          if (!desktopMenu.matches) scroller.scrollTop += howItWorks.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 8;
+          if (focus) byId('after-practice-title').focus({preventScroll:true});
         });
+      } else {
+        const scroller = desktopMenu.matches ? howItWorks.querySelector('.menu-content') : headerMenu.querySelector('.menu-panel');
+        scroller.scrollTop = 0;
+        afterPracticeToggle.focus({preventScroll:true});
       }
     }
+    byId('after-practice-back').addEventListener('click', () => showAfterPractice(false));
     afterPracticeToggle.addEventListener('click', () => showAfterPractice(afterPracticeContent.hidden));
     function openAfterPracticeHash() {
       if (location.hash === '#after-practice') showAfterPractice(true, true);
