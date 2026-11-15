@@ -412,6 +412,14 @@
       #how-it-works > .menu-content { width:min(620px, calc(100vw - 48px)); max-height:min(680px, calc(100dvh - 100px)); }
     }
 </style>
+<style>
+    .menu-panel::-webkit-scrollbar, .menu-content::-webkit-scrollbar { width:10px; }
+    .menu-panel::-webkit-scrollbar-track, .menu-content::-webkit-scrollbar-track { background:transparent; margin-block:12px; }
+    .menu-panel::-webkit-scrollbar-thumb, .menu-content::-webkit-scrollbar-thumb { background:rgba(104,62,43,.28); border-radius:999px; }
+    @supports not selector(::-webkit-scrollbar) {
+      .menu-panel, .menu-content { scrollbar-width:thin; scrollbar-color:rgba(104,62,43,.28) transparent; }
+    }
+</style>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="prayer-ink" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 -3 -1 0 5.7"/><feComponentTransfer result="mask"><feFuncA type="linear" slope="1.15" intercept="0"/></feComponentTransfer><feFlood flood-color="#91482f"/><feComposite in2="mask" operator="in"/></filter></defs></svg>
@@ -457,7 +465,6 @@
 <p>В следующие дни то же Намерение повторять не нужно. Если появился другой вопрос, можно выразить новое Намерение.</p>
 <h3>Когда стоит вернуться к Мирону?</h3>
 <p>Когда появилась новая ситуация, хочется разобраться в своих чувствах, услышать себя или найти опору. Можно вернуться и к знакомой ситуации, чтобы увидеть, что изменилось и какой шаг теперь тебе подходит.</p>
-<p>Возвращение — по твоему желанию. Здесь можно получить поддержку и продолжить собственный путь.</p>
 </section>
           <p class="how-menu-link" id="after-practice-back-row" hidden><button type="button" class="after-practice-toggle" id="after-practice-back">← Как это работает</button></p>
           <p class="how-menu-link"><a class="contact-link question-link" href="#contact" aria-haspopup="dialog">Задать вопрос</a></p>
