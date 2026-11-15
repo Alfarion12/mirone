@@ -1627,7 +1627,7 @@
       const clean=new URL(location.href);clean.searchParams.delete('reviewStart');history.replaceState(null,'',clean.href);
       byId('start').click();
     } else if (liveMode && preview.get('qaStart') === '1') startLive();
-    else if (liveMode && !preview.has('screen') && location.hash !== '#after-practice') {
+    else if (liveMode && !preview.has('screen') && preview.get('home') !== '1' && location.hash !== '#after-practice') {
       const sessionId = savedLiveSession();
       if (sessionId) resumeLive(sessionId);
     }
