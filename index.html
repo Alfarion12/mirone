@@ -401,6 +401,15 @@
     window.visualViewport?.addEventListener('resize', fitMobilePage);
   </script>
 <style>#home .practice-kicker{display:flex;align-items:center;gap:9px} .practice-icon{display:block;width:26px;height:31px;overflow:hidden;flex:none}.practice-icon img{display:block;width:53.62px;height:53.62px;max-width:none;transform:translate(-13.81px,-8.94px);filter:url(#prayer-ink);opacity:0.45}</style>
+<style>
+    .after-practice-toggle { border:0; padding:0; background:transparent; color:var(--accent-dark); font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+    .after-practice-open .how-overview { display:none; }
+    #after-practice-content { border-top:1px solid var(--line); padding-top:4px; }
+    #after-practice-content h3 { margin:14px 0 8px; font-size:15px; line-height:1.4; color:var(--ink); }
+    @media (min-width:1000px) {
+      #how-it-works.after-practice-open > .menu-content { width:min(620px, calc(100vw - 48px)); max-height:min(680px, calc(100dvh - 100px)); }
+    }
+</style>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="prayer-ink" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 -3 -1 0 5.7"/><feComponentTransfer result="mask"><feFuncA type="linear" slope="1.15" intercept="0"/></feComponentTransfer><feFlood flood-color="#91482f"/><feComposite in2="mask" operator="in"/></filter></defs></svg>
@@ -423,14 +432,31 @@
           <p><a class="contact-link feedback-link" href="#contact" aria-haspopup="dialog">Оставить отзыв</a></p>
           </div>
         </details>
-        <details name="menu-topic">
+        <details name="menu-topic" id="how-it-works">
           <summary>Как это работает</summary>
-          <div class="menu-content">
+          <div class="menu-content"><div class="how-overview">
           <p>Я задам несколько вопросов, по одному за раз, чтобы помочь тебе прислушаться к себе и яснее понять свою ситуацию. Потом расскажу, что услышал в твоих ответах, и помогу заметить важные связи. Ты сможешь сказать, откликается ли тебе это.</p>
           <p>Если захочешь, мы подготовим твоё Намерение — обращение к Высшим Силам. Ты сможешь изменить любые слова, чтобы они были по душе. Затем я подскажу, как выразить его искренне и осознанно. В основе подхода — глубокая и действенная духовная практика вне религии. Мой создатель вложил сюда то, что прошёл сам и что приносит реальные результаты.</p>
           <p>Я знаю, что Бог всегда рядом и слышит нас, когда мы обращаемся к нему искренне, и помогает, когда это уместно. Просить можно и о малом, и о большом. При этом конкретные ощущения, способ помощи, результат или срок не гарантированы. У каждого — свой индивидуальный опыт.</p>
           <p>В конце ты сможешь сохранить то, что понял о себе, вместе со своим Намерением. К этим словам можно вернуться, когда снова понадобится опора. Как поступить дальше, решаешь ты.</p>
           <p>Ты можешь приходить с новой ситуацией или вернуться к той же — чтобы понять, что теперь чувствуешь, заметить привычную реакцию и найти свой следующий шаг.</p>
+          </div><p><button type="button" class="after-practice-toggle" id="after-practice-toggle" aria-expanded="false" aria-controls="after-practice-content">После практики</button></p>
+          <section id="after-practice-content" aria-label="После практики" hidden><h3>Что делать сразу после Намерения?</h3>
+<p>Можно вернуться к обычным делам и дать себе спокойно жить дальше. Не нужно специально торопить события или постоянно проверять, появился ли результат.</p>
+<p>Выразив Намерение, ты попросил о поддержке и дал себе шанс её получить. Теперь постарайся отпустить напряжённое ожидание. Помни, что никто тебе ничего не должен. Обращайся с доверием и благодарностью, оставляя форму и время помощи за Высшими Силами.</p>
+<h3>А собственные действия нужны?</h3>
+<p>Да. Поддержка сочетается с твоими собственными шагами. Необязательно действовать немедленно. Можно отдохнуть, прислушаться к себе и затем двигаться небольшими, посильными шагами в направлении того, что для тебя важно. Пусть эти шаги будут целенаправленными и регулярными.</p>
+<p>Ориентируйся на предложенный в итоге шаг и свою ситуацию. Действуй без излишнего напряжения, с любовью к себе и миру, стремясь к гармонии для всех.</p>
+<h3>Если я ничего особенного не почувствовал?</h3>
+<p>Ощущения у людей разные. Определённого чувства сразу после обращения может не быть. Дай себе время и продолжай учиться прислушиваться к себе в обычной жизни.</p>
+<p>В этом подходе важны вера и настойчивость. Направляй внимание на развитие выбранного качества и свои действия. В основе этих рекомендаций — практический опыт создателя Мирона более пятнадцати лет; твой собственный опыт будет индивидуальным.</p>
+<h3>Нужно ли повторять Намерение?</h3>
+<p>Одного искреннего обращения достаточно. Если в момент произнесения чувствуешь потребность повторить его, можно произнести до трёх раз в одном подходе, каждый раз спокойнее и увереннее.</p>
+<p>В следующие дни то же Намерение повторять не нужно. Если появился другой вопрос, можно выразить новое Намерение.</p>
+<h3>Когда стоит вернуться к Мирону?</h3>
+<p>Когда появилась новая ситуация, хочется разобраться в своих чувствах, услышать себя или найти опору. Можно вернуться и к знакомой ситуации, чтобы увидеть, что изменилось и какой шаг теперь тебе подходит.</p>
+<p>Возвращение — по твоему желанию. Здесь можно получить поддержку и продолжить собственный путь.</p>
+</section>
           <p><a class="contact-link question-link" href="#contact" aria-haspopup="dialog">Задать вопрос</a></p>
           </div>
         </details>
@@ -603,6 +629,31 @@
         else menuToggle.focus();
       }
     });
+
+    const afterPracticeToggle = byId('after-practice-toggle');
+    const afterPracticeContent = byId('after-practice-content');
+    const howItWorks = byId('how-it-works');
+    function showAfterPractice(open, focus = false) {
+      afterPracticeContent.hidden = !open;
+      afterPracticeToggle.setAttribute('aria-expanded', String(open));
+      howItWorks.classList.toggle('after-practice-open', open);
+      if (open) {
+        headerMenu.open = true;
+        howItWorks.open = true;
+        requestAnimationFrame(() => {
+          const scroller = desktopMenu.matches ? howItWorks.querySelector('.menu-content') : headerMenu.querySelector('.menu-panel');
+          scroller.scrollTop += afterPracticeToggle.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 18;
+          if (focus) afterPracticeToggle.focus({preventScroll:true});
+        });
+      }
+    }
+    afterPracticeToggle.addEventListener('click', () => showAfterPractice(afterPracticeContent.hidden));
+    function openAfterPracticeHash() {
+      if (location.hash === '#after-practice') showAfterPractice(true, true);
+    }
+    window.addEventListener('hashchange', openAfterPracticeHash);
+    window.addEventListener('load', openAfterPracticeHash, {once:true});
+
     const contactDialog = byId('contact');
     const contactForm = byId('contact-form');
     const contactStatus = byId('contact-status');
@@ -1553,7 +1604,7 @@
       const clean=new URL(location.href);clean.searchParams.delete('reviewStart');history.replaceState(null,'',clean.href);
       byId('start').click();
     } else if (liveMode && preview.get('qaStart') === '1') startLive();
-    else if (liveMode && !preview.has('screen')) {
+    else if (liveMode && !preview.has('screen') && location.hash !== '#after-practice') {
       const sessionId = savedLiveSession();
       if (sessionId) resumeLive(sessionId);
     }
