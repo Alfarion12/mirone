@@ -176,6 +176,16 @@
     .outcome .outcome-note { color: var(--accent-dark); font-size: 13px; line-height: 1.35; margin: 8px 0 0; }
     .outcome #email-outcome { position: relative; width: 100%; margin-top: 9px; padding-inline: 38px; }
     .copy-check { position: absolute; inset-inline-end: 14px; top: 50%; transform: translateY(-50%); color: #287648; font-size: 20px; }
+    .home-footer-tools { position:relative;display:flex;align-items:center;justify-content:space-between;gap:18px;margin:6px 0 0;min-height:34px; }
+    .home-footer-actions { display:flex;align-items:center;gap:13px;flex:none; }
+    .home-footer-tools > button, .home-footer-actions > button { display:inline-flex;align-items:center;gap:5px;border:0;padding:5px 0;background:transparent;color:#8b5944;font:13px/1.4 "Segoe UI",sans-serif;white-space:nowrap; }
+    .home-footer-actions > button > svg { width:16px;height:16px;flex:none; }
+    .home-footer-tools .privacy-toggle { font-size:11px;color:#948b85;flex:none; }
+    .home-footer-tools > button:hover, .home-footer-actions > button:hover { text-decoration:underline;text-underline-offset:3px; }
+    .footer-note { position:absolute;bottom:calc(100% + 9px);left:0;z-index:5;width:100%;padding:15px 17px;background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 25px #5533201a;color:var(--muted);font:14px/1.5 "Segoe UI",sans-serif; }
+    .footer-note::after { content:"";position:absolute;bottom:-6px;left:25px;width:10px;height:10px;background:var(--white);border-right:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg); }
+    .footer-note p { margin:0; }
+    @media(max-width:360px) { .home-footer-tools { gap:8px; }.home-footer-actions { gap:8px; }.home-footer-actions > button { font-size:12px; }.home-footer-tools .privacy-toggle {font-size:10px;} }
     .final-share { display: grid; grid-template-columns: 19px minmax(0, 1fr) 19px; gap: 8px; width: 100%; text-align: center; }
     @media (hover: hover) {
       #email-outcome:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
@@ -413,13 +423,13 @@
         <details name="menu-topic" data-topic="privacy" hidden>
           <summary>Конфиденциальность</summary>
           <div class="menu-content">
-          <p>Переписка сохраняется в архив и доступна только автору сервиса, используется для улучшения сервиса и не публикуется.</p>
+          <p>Переписка сохраняется в архив и доступна только автору сервиса, используется для улучшения сервиса и никак не публикуется.</p>
           </div>
         </details>
         <details name="menu-topic">
           <summary>Связаться с автором</summary>
           <div class="menu-content">
-          <p>Переписка сохраняется в архив и доступна только автору сервиса, используется для улучшения сервиса и не публикуется.</p>
+          
           <p>Хочешь оставить отзыв, задать вопрос или предложить сотрудничество? <a class="contact-link" href="#contact" aria-haspopup="dialog">Напиши Александру</a>, создателю этой практики.</p>
           </div>
         </details>
@@ -441,6 +451,14 @@
       <div class="quiet-note">
         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true"><path d="M20.8 8.8c0 4.3-8.8 9-8.8 9s-8.8-4.7-8.8-9a4.4 4.4 0 0 1 8.8-.5 4.4 4.4 0 0 1 8.8.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
         Один вопрос за раз. Можно своими словами, как получается.
+      </div>
+      <div class="home-footer-tools" id="home-footer-tools">
+        <button type="button" class="privacy-toggle" id="footer-privacy" aria-controls="footer-note" aria-expanded="false">Конфиденциальность</button>
+        <div class="home-footer-actions">
+          <button type="button" id="footer-bookmark" aria-controls="footer-note" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3-5.6-3-5.6 3 1.1-6.3L3 9.6l6.2-.9Z"/></svg>В закладки</button>
+          <button type="button" id="footer-share" aria-controls="share-options" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V3m-4 4 4-4 4 4M6 11H4v10h16V11h-2"/></svg>Поделиться</button>
+        </div>
+        <div class="footer-note" id="footer-note" role="region" aria-label="Пояснение" hidden><p id="footer-note-text"></p></div>
       </div>
     </section>
 
@@ -1098,18 +1116,37 @@
     });
     const shareButton = byId('share-practice');
     const shareOptions = byId('share-options');
+    const shareHome = byId('footer-share'), homeFooter = byId('home-footer-tools');
+    const footerPrivacy=byId('footer-privacy'), footerBookmark=byId('footer-bookmark'), footerNote=byId('footer-note');
+    const finalShareHost=shareOptions.parentElement;
+    let activeShareButton=shareButton, activeFooterButton=null;
+    function closeFooterNote(){footerNote.hidden=true;footerPrivacy.setAttribute('aria-expanded','false');footerBookmark.setAttribute('aria-expanded','false');activeFooterButton=null;}
+    function toggleFooterNote(button,text){const open=footerNote.hidden || activeFooterButton!==button;closeFooterNote();showShareOptions(false);if(open){byId('footer-note-text').textContent=text;footerNote.hidden=false;button.setAttribute('aria-expanded','true');activeFooterButton=button;}}
+    footerPrivacy.addEventListener('click',()=>toggleFooterNote(footerPrivacy,'Переписка сохраняется в архив и доступна только автору сервиса, используется для улучшения сервиса и никак не публикуется.'));
+    footerBookmark.addEventListener('click',()=>{
+      const ua=navigator.userAgent;
+      const ios=/iPhone|iPad|iPod/.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+      const text=ios?'В Safari нажми «Поделиться», затем «Добавить закладку». В другом браузере открой его меню и выбери добавление в закладки.':/Android/.test(ua)?'Открой меню браузера и нажми звёздочку или «Добавить в закладки», чтобы сохранить Мирона.':/Mac/.test(navigator.platform)?'Нажми ⌘D, чтобы добавить Мирона в закладки браузера.':'Нажми Ctrl+D, чтобы добавить Мирона в закладки браузера.';
+      toggleFooterNote(footerBookmark,text);
+    });
+    shareHome.addEventListener('click',()=>showShareOptions(shareOptions.hidden || activeShareButton!==shareHome,shareHome));
+    document.addEventListener('click',event=>{if(!footerNote.hidden && !footerNote.contains(event.target) && !footerPrivacy.contains(event.target) && !footerBookmark.contains(event.target))closeFooterNote();});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape' && !footerNote.hidden){const button=activeFooterButton;closeFooterNote();button?.focus();}});
+
     byId('share-telegram').href = 'https://t.me/share/url?url=' + encodeURIComponent(practiceLink);
     byId('share-max').href = 'https://max.ru/:share?text=' + encodeURIComponent(practiceLink);
     byId('share-whatsapp').href = 'https://wa.me/?text=' + encodeURIComponent(practiceLink);
     byId('share-email').href = 'mailto:?subject=' + encodeURIComponent('Практика с Мироном')
       + '&body=' + encodeURIComponent(practiceLink);
 
-    function showShareOptions(visible) {
+    function showShareOptions(visible,trigger=activeShareButton) {
+      if(visible){closeFooterNote();activeShareButton=trigger;(trigger===shareHome?homeFooter:finalShareHost).append(shareOptions);}
       shareOptions.hidden = !visible;
-      shareButton.setAttribute('aria-expanded', String(visible));
+      shareButton.setAttribute('aria-expanded', String(visible && activeShareButton===shareButton));
+      shareHome.setAttribute('aria-expanded', String(visible && activeShareButton===shareHome));
       if (!visible) { byId('share-fallback').hidden = true; byId('share-copy-status').textContent = ''; }
     }
-    shareButton.addEventListener('click', () => showShareOptions(shareOptions.hidden));
+    shareButton.addEventListener('click', () => showShareOptions(shareOptions.hidden || activeShareButton!==shareButton,shareButton));
     byId('share-more').addEventListener('click', async () => {
       if (navigator.share) {
         try { await navigator.share({ url: practiceLink }); showShareOptions(false); return; }
@@ -1124,10 +1161,10 @@
       } catch { byId('share-copy-status').textContent = practiceLink; }
     });
     document.addEventListener('click', event => {
-      if (!shareOptions.hidden && !shareOptions.contains(event.target) && !shareButton.contains(event.target)) showShareOptions(false);
+      if (!shareOptions.hidden && !shareOptions.contains(event.target) && !shareButton.contains(event.target) && !shareHome.contains(event.target)) showShareOptions(false);
     });
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !shareOptions.hidden) { showShareOptions(false); shareButton.focus(); }
+      if (event.key === 'Escape' && !shareOptions.hidden) { showShareOptions(false); activeShareButton.focus(); }
     });
     answer.addEventListener('keydown', event => {
       if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && send.dataset.label === 'Отправить') {
@@ -1286,6 +1323,8 @@
     }
     function updateLiveReviewControls() {
       const screen=document.body.dataset.activeScreen;
+      homeFooter.hidden=reviewEnabled;
+      if(reviewEnabled){closeFooterNote();if(activeShareButton===shareHome)showShareOptions(false);}
       const busy=pending || liveStarting;
       const locked=screen !== 'home';
       reviewMockNext.closest('.review-mode').classList.toggle('is-inactive',locked && liveMode);
