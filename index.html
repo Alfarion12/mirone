@@ -413,11 +413,12 @@
     }
 </style>
 <style>
-    .menu-panel::-webkit-scrollbar, .menu-content::-webkit-scrollbar { width:10px; }
-    .menu-panel::-webkit-scrollbar-track, .menu-content::-webkit-scrollbar-track { background:transparent; margin-block:12px; }
-    .menu-panel::-webkit-scrollbar-thumb, .menu-content::-webkit-scrollbar-thumb { background:rgba(104,62,43,.28); border-radius:999px; }
+    *::-webkit-scrollbar { width:10px; height:10px; }
+    *::-webkit-scrollbar-track { background:transparent; margin-block:12px; margin-inline:12px; }
+    *::-webkit-scrollbar-thumb { background:rgba(104,62,43,.28); border-radius:999px; }
+    *::-webkit-scrollbar-corner { background:transparent; }
     @supports not selector(::-webkit-scrollbar) {
-      .menu-panel, .menu-content { scrollbar-width:thin; scrollbar-color:rgba(104,62,43,.28) transparent; }
+      * { scrollbar-width:thin; scrollbar-color:rgba(104,62,43,.28) transparent; }
     }
 </style>
 </head>
