@@ -560,6 +560,7 @@
           <p id="outcome-status" role="status" aria-live="polite"></p>
         </form>
       </section>
+      <p class="ending-text" id="outcome-return" hidden><strong>Возвращайся к Мирону</strong>, когда почувствуешь, что хочется поговорить.</p>
       <div class="quiet-note final-share" hidden>
         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true"><path d="M20.8 8.8c0 4.3-8.8 9-8.8 9s-8.8-4.7-8.8-9a4.4 4.4 0 0 1 8.8-.5 4.4 4.4 0 0 1 8.8.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
         <div>
@@ -1019,6 +1020,7 @@
     let outcomeEmailBusy = false, outcomeEmailRetry = null, outcomeEmailSent = '', outcomeEmailDeliveryStatus = '', outcomeEmailVersion = 0, outcomeEmailAbort = null;
     function renderOutcomeEmail() {
       const sent = Boolean(outcomeEmailSent && outcomeEmailSent === outcomeEmailInput.value.trim());
+      byId('outcome-return').hidden = !sent;
       outcomeEmailInput.disabled = outcomeEmailBusy;
       outcomeEmailButton.disabled = outcomeEmailBusy || sent;
       outcomeEmailForm.setAttribute('aria-busy', String(outcomeEmailBusy));
@@ -1208,9 +1210,10 @@
         }
         outcomeEmailSent = email;
         outcomeEmailDeliveryStatus = result.status;
+        const savedContents = 'открытие' + (acceptedIntention.trim() ? ' и Намерение' : '');
         notice.textContent = result.status === 'confirmation_sent'
-          ? 'На ' + email + ' отправлена ссылка. Перейди по ней, чтобы получить итог.'
-          : 'Проверь почту: ' + email + '.';
+          ? 'Проверь почту: перейди по ссылке в письме, чтобы получить своё ' + savedContents + '.'
+          : 'Проверь почту — твоё ' + savedContents + ' уже там.';
       } catch (error) {
         if (version !== outcomeEmailVersion) return;
         notice.dataset.error = 'true';
