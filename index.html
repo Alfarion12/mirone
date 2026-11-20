@@ -502,7 +502,7 @@
       </div>
       <div class="quiet-note">
         <svg viewBox="0 0 24 24" width="19" height="19" fill="none" aria-hidden="true"><path d="M20.8 8.8c0 4.3-8.8 9-8.8 9s-8.8-4.7-8.8-9a4.4 4.4 0 0 1 8.8-.5 4.4 4.4 0 0 1 8.8.5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-        Один вопрос за раз. Можно своими словами, как получается.
+        Один вопрос за раз. Рассказывай своими словами — главное, искренне. Подробности помогут мне лучше понять тебя.
       </div>
       <div class="home-footer-tools" id="home-footer-tools">
         <button type="button" class="privacy-toggle" id="footer-privacy" aria-controls="footer-note" aria-expanded="false">Конфиденциальность</button>
@@ -1511,6 +1511,15 @@
         newRows.push(bubble.parentElement);
       }
       liveCount = data.messages.length;
+      const stageIndex = ['name','q1','q2','q3','q4','q5','mirror','draft','speak','end'].indexOf(data.stage);
+      const topicsCompleted = Number.isInteger(data.topicsCompleted) && data.topicsCompleted >= 0 && data.topicsCompleted <= 5
+        ? data.topicsCompleted : Math.max(0, Math.min(5, stageIndex - 1));
+      const stageLabels = { name:'Знакомство', mirror:'Что я услышал', draft:'Выбор Намерения', speak:'Произнесение Намерения', end:'Завершение практики' };
+      byId('step-count').textContent = /^q[1-5]$/.test(data.stage)
+        ? 'Рассмотрено тем: ' + topicsCompleted + ' из 5' : (stageLabels[data.stage] || 'Практика');
+      const progress = typeof data.progress === 'number' && Number.isFinite(data.progress) && data.progress >= 0 && data.progress <= 1
+        ? data.progress : Math.min(1, (Math.max(0, stageIndex) + 1) / 9);
+      byId('chat-progress-fill').style.width = (progress * 100) + '%';
       if (data.ending) {
         const e = data.ending;
         thought = e.summary; acceptedIntention = e.intention || '';
@@ -1525,8 +1534,6 @@
         const index = ['name','q1','q2','q3','q4','q5','mirror','draft','speak'].indexOf(data.stage);
         step = Math.max(0,index);
         byId('chat-title').textContent = data.stage === 'name' ? 'Знакомство' : data.stage === 'mirror' ? 'Что я услышал' : ['draft','speak'].includes(data.stage) ? 'Намерение' : 'Ситуация';
-        byId('step-count').textContent = 'Шаг ' + (step+1) + ' из 9';
-        byId('chat-progress-fill').style.width = ((step+1)/9*100)+'%';
         form.classList.add('message-form'); answer.maxLength = data.stage === 'name' ? 80 : 5000;
         send.dataset.label = 'Отправить'; answer.setAttribute('enterkeyhint','send');
         show('chat', false);
