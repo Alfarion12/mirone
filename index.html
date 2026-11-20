@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
   <meta name="theme-color" content="#fdfbf8">
+  <link rel="preconnect" href="https://api.mirone.ru" crossorigin>
   <meta name="robots" content="index, follow">
   <meta name="description" content="Короткая практика с ИИ в трудной ситуации. Несколько вопросов, чтобы услышать себя и при желании обратиться к Высшим Силам за поддержкой.">
   <title>Мирон</title>
@@ -1392,7 +1393,7 @@
     let liveMode = requestedReviewMode !== 'mock' && (publicLive || (['127.0.0.1','localhost'].includes(location.hostname) && (new URLSearchParams(location.search).get('live') === '1' || requestedReviewMode === 'live')));
     const apiEndpoint = publicLive ? 'https://api.mirone.ru/api/chat' : '/api/chat';
     let liveSession = null, liveCount = 0, liveRetry = null;
-    let liveStage = 'name', liveStarting = false;
+    let liveStage = 'name', liveStarting = false, liveStartTask = null;
     const liveStorageKey = 'miron.live.session:' + new URL(apiEndpoint, location.href).href;
     const liveTabKey = liveStorageKey + ':tab';
     function savedLiveSession() {
@@ -1577,24 +1578,40 @@
         liveStarting = false; button.disabled = false; setPending(false); resizeMessage();
       }
     }
-    async function startLive() {
-      if (liveStarting || pending) return;
+    function startLive() {
+      if (liveStarting || pending) return liveStartTask;
       const previousSession = liveSession || savedLiveSession();
       liveStarting = true;
       updateLiveReviewControls();
       const button = byId('start'); button.disabled = true;
-      try {
+      reset();liveCount=0;liveRetry=null;
+      // The first greeting needs no model or session. Open immediately and let
+      // the server create the durable conversation while the person reads/types.
+      renderLive({sessionId:null,stage:'name',name:'',topicsCompleted:0,progress:1/9,
+        messages:[{who:'miron',text:'Привет, я Мирон. **Как тебя зовут?**'}]});
+      answer.value=reviewEnabled?dialogue[0].example:'';setPending(false);message();resizeMessage();
+      liveStartTask=(async()=>{try {
         await ownerReviewReady;
-        const data = await apiChat({action:'start', ...(reviewEnabled ? {testMode:true,reviewToken:ownerReviewToken()} : {})});
+        const data = await apiChat({action:'start', ...(reviewEnabled ? {testMode:true,reviewToken:ownerReviewToken()} : {})},20000);
         forgetLiveSession(previousSession);
-        reset();liveCount=0;liveRetry=null;renderLive(data);setPending(false);answer.value=reviewEnabled?liveReviewExample():'';rememberLiveDraft();resizeMessage();
+        renderLive(data);rememberLiveDraft();resizeMessage();
+        return true;
       } catch {
-        button.textContent = 'Не удалось подключиться. Попробовать ещё раз';
-      } finally {button.disabled=false;liveStarting=false;updateLiveReviewControls();}
+        message('Не удалось подключиться. Текст остался в поле — нажми отправить, чтобы попробовать ещё раз.',true);
+        return false;
+      } finally {button.disabled=false;liveStarting=false;updateLiveReviewControls();}})();
+      return liveStartTask;
     }
     async function advanceLive(value) {
       const text=value.trim();
-      if(pending || !text || !liveSession) return;
+      if(pending || !text) return;
+      if(!liveSession){
+        const connection=liveStarting?liveStartTask:startLive();
+        answer.value=value;resizeMessage();setPending(true);
+        const ready=await connection;
+        setPending(false);
+        if(!ready||!liveSession)return;
+      }
       if(text.length>answer.maxLength) {message('Ответ слишком длинный. Можно отправить до '+answer.maxLength+' символов.',true);return;}
       if(!liveRetry || liveRetry.text!==text) liveRetry={text,requestId:crypto.randomUUID()};
       const payload={sessionId:liveSession,...liveRetry};
