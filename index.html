@@ -816,13 +816,16 @@
         // A mobile preview may expose a device screen shorter than the layout viewport.
         const deviceHeight = window.screen.height;
         const deviceWidth = window.screen.width;
-        const mobilePreview = localPreview && deviceWidth >= 280 && deviceWidth <= 640
+        const mobilePreview = deviceWidth >= 280 && deviceWidth <= 640
           && deviceHeight >= 360 && deviceHeight <= 1100;
         // The Codex frame can clip the webview without changing its reported height.
         const requestedHeight = Number(new URLSearchParams(window.location.search).get('height'));
         const previewHeight = requestedHeight >= 360 && requestedHeight <= 1100
           ? requestedHeight : mobilePreview ? deviceHeight : 667;
-        const visibleHeight = localPreview ? Math.min(height, previewHeight) : height;
+        // Device frames can clip a taller layout on the public site too. Keep the
+        // composer inside the mobile screen, while a shorter keyboard viewport wins.
+        const visibleHeight = mobilePreview ? Math.min(height, deviceHeight, ...(localPreview ? [previewHeight] : []))
+          : localPreview ? Math.min(height, previewHeight) : height;
         document.documentElement.style.setProperty('--chat-height', visibleHeight + 'px');
       }
       keepComposerVisible();
